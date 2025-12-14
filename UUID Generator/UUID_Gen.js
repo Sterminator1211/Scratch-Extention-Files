@@ -119,6 +119,17 @@ class UUIDExtension {
     );
   }
 
+  // ---------- UUID v4 ----------
+  uuidV4() {
+    return (
+      this.randHex(8) + '-' +
+      this.randHex(4) + '-4' +
+      this.randHex(3) + '-' +
+      this.randHex(4) + '-' +
+      this.randHex(12)
+    );
+  }
+
   // ---------- UUID v5 ----------
   uuidV5(args) {
     const rand = this.seededRandom('v5:' + String(args.SEED));
@@ -131,17 +142,6 @@ class UUIDExtension {
       hex.slice(12, 16) + '-' +
       hex.slice(16, 20) + '-' +
       hex.slice(20)
-    );
-  }
-
-  // ---------- UUID v4 ----------
-  uuidV4() {
-    return (
-      this.randHex(8) + '-' +
-      this.randHex(4) + '-4' +
-      this.randHex(3) + '-' +
-      this.randHex(4) + '-' +
-      this.randHex(12)
     );
   }
 
