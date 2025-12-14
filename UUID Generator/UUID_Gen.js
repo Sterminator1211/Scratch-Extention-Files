@@ -16,7 +16,7 @@ class UUIDExtension {
           arguments: {
             SEED: {
               type: Scratch.ArgumentType.STRING,
-              defaultValue: 'name'
+              defaultValue: 'Bob'
             }
           }
         },
@@ -27,7 +27,7 @@ class UUIDExtension {
           arguments: {
             SEED: {
               type: Scratch.ArgumentType.STRING,
-              defaultValue: 'name'
+              defaultValue: 'Jeff'
             }
           }
         },
@@ -48,7 +48,7 @@ class UUIDExtension {
           arguments: {
             SEED: {
               type: Scratch.ArgumentType.STRING,
-              defaultValue: 'A.B'
+              defaultValue: 'Waffles & Bacon'
             }
           }
         },
