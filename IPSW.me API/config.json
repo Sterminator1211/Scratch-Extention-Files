@@ -1,0 +1,6 @@
+{
+    "name": "IPSW.me API fetcher",
+    "description": "Fetches data from the IPSW.me website API.",
+    "version": "4.0.0",
+    "author": "Sterm"
+}
