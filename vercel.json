@@ -1,9 +1,7 @@
 {
   "functions": {
     "api/extensions.js": {
-      "includeFiles": [
-        "**/*"
-      ]
+      "includeFiles": "**/*"
     }
   }
 }
