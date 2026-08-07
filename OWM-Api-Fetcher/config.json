@@ -1,0 +1,6 @@
+{
+    "name": "Open Weather Map API Fetcher",
+    "description": "Adds blocks to read the Open Weather Map API (Requires API Key).",
+    "version": "2.6.3",
+    "author": "Sterm"
+}
