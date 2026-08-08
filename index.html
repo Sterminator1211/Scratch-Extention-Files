@@ -2,43 +2,44 @@
 <html lang="en">
 <head>
 
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
 
-<title>Extension Collection</title>
+    <title>Extension Collection</title>
 
-<link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style.css">
 
 </head>
 <body>
 
-<header class="hero">
+    <header class="hero">
 
-    <h1>Extension Collection</h1>
+        <h1>Extension Collection</h1>
 
-    <p>Browse special rare-use-case extensions.</p>
+        <p>Browse special, totally-semi-rare-use-case extensions.</p>
 
-    <input
-        id="search"
-        type="text"
-        placeholder="Search extensions..."
-    >
+        <input
+            id="search"
+            type="text"
+            placeholder="Search extensions..."
+            autocomplete="off"
+        >
 
-</header>
+    </header>
 
-<main>
+    <main>
 
-    <div id="extensionGrid" class="grid">
+        <div id="extensionGrid" class="grid">
 
-        <div class="loading">
-Loading extensions...
+            <div class="loading">
+                Loading extensions...
+            </div>
+
         </div>
 
-    </div>
+    </main>
 
-</main>
-
-<script src="script.js"></script>
+    <script src="script.js"></script>
 
 </body>
 </html>
