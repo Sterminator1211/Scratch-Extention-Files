@@ -1,6 +1,9 @@
 {
     "name": "Kitchen Utilities",
     "description": "Adds random utility blocks.",
+    "longdescription": "Adds random blocks and reporters to do various tasks",
+    "state" : "Stable",
+    "statecolor" : "#123524",
     "version": "7.2.0",
     "author": "Sterm"
 }
