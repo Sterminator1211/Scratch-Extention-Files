@@ -1,3 +1,141 @@
+/* I am inserting stuff i do not understand here */
+/* ============================= */
+/* Search Row */
+/* ============================= */
+
+.search-row {
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    gap: 10px;
+
+    margin-top: 30px;
+}
+
+
+/* ============================= */
+/* Dependencies Button */
+/* ============================= */
+
+.dependencies-button {
+    width: 50px;
+    height: 50px;
+
+    flex: 0 0 50px;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    padding: 0;
+
+    border: none;
+
+    border-radius: 12px;
+
+    background: #e8892d;
+
+    color: white;
+
+    cursor: pointer;
+
+    transition:
+        background .2s,
+        transform .2s,
+        box-shadow .2s;
+}
+
+
+.dependencies-button:hover {
+    background: #f39a3c;
+
+    transform: translateY(-2px);
+
+    box-shadow:
+        0 6px 18px
+        rgba(232, 137, 45, .25);
+}
+
+
+.dependencies-button.active {
+    background: #d66f17;
+}
+
+
+.dependencies-button svg {
+    width: 25px;
+    height: 25px;
+
+    fill: none;
+
+    stroke: currentColor;
+
+    stroke-width: 1.8;
+
+    stroke-linecap: round;
+
+    stroke-linejoin: round;
+}
+
+
+/* ============================= */
+/* Search */
+/* ============================= */
+
+.search-row #search {
+    margin-top: 0;
+}
+
+
+/* ============================= */
+/* Page Title */
+/* ============================= */
+
+.page-title {
+    grid-column: 1 / -1;
+
+    margin-bottom: 5px;
+}
+
+
+.page-title h1 {
+    font-size: 32px;
+
+    margin-bottom: 8px;
+}
+
+
+.page-title p {
+    color: #9da6b8;
+
+    font-size: 16px;
+}
+
+
+/* ============================= */
+/* Dependency Grid */
+/* ============================= */
+
+.dependency-grid {
+    grid-column: 1 / -1;
+
+    display: grid;
+
+    grid-template-columns:
+        repeat(
+            auto-fill,
+            minmax(320px, 1fr)
+        );
+
+    gap: 25px;
+
+    width: 100%;
+}
+/* Start? */
 * {
     margin: 0;
     padding: 0;
@@ -511,6 +649,29 @@ main {
 
     .details-download {
         width: 100%;
+    }
+
+}
+
+@media (max-width: 700px) {
+
+    .search-row {
+        width: 100%;
+    }
+
+    .search-row #search {
+        width: 100%;
+    }
+
+    .dependencies-button {
+        width: 50px;
+        height: 50px;
+
+        flex: 0 0 50px;
+    }
+
+    .page-title h1 {
+        font-size: 28px;
     }
 
 }
