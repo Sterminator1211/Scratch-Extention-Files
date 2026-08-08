@@ -2,7 +2,7 @@
     "name": "Generic Controller Extension",
     "description": "Adds blocks to interact and gain output from your controller.",
     "longdescription": "Adds Hats, Blocks, Reporters and Booleans to Interact and gain output from controllers, (RUMBLE NOT CURRENTLY TESTED).",
-    "state" : "Stable",
+    "state" : "Experiemental",
     "statecolor" : "#486586",
     "version": "3.1.2",
     "author": "Sterm"
