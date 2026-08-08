@@ -13,6 +13,11 @@ const dependenciesButton =
         "dependenciesButton"
     );
 
+const mainPageButton =
+    document.getElementById(
+        "mainPageButton"
+    );
+
 
 let extensions = [];
 
@@ -44,10 +49,6 @@ async function loadExtensions() {
             await response.json();
 
 
-        /*
-         * Read the current URL.
-         */
-
         const params =
             new URLSearchParams(
                 window.location.search
@@ -67,7 +68,7 @@ async function loadExtensions() {
 
 
         /*
-         * Individual extension page.
+         * Individual extension page
          */
 
         if (extensionName) {
@@ -94,7 +95,7 @@ async function loadExtensions() {
 
 
         /*
-         * Dependencies page.
+         * Dependencies page
          */
 
         if (
@@ -110,7 +111,7 @@ async function loadExtensions() {
 
 
         /*
-         * Normal extension page.
+         * Normal extension page
          */
 
         renderExtensions();
@@ -146,11 +147,17 @@ function renderExtensions(
     list = null
 ) {
 
-    search.style.display = "";
+    search.style.display =
+        "";
+
 
     dependenciesButton.classList.remove(
         "active"
     );
+
+
+    mainPageButton.style.display =
+        "";
 
 
     const source =
@@ -177,11 +184,17 @@ function renderDependencies(
     list = null
 ) {
 
-    search.style.display = "";
+    search.style.display =
+        "";
+
 
     dependenciesButton.classList.add(
         "active"
     );
+
+
+    mainPageButton.style.display =
+        "";
 
 
     const dependencies =
@@ -384,11 +397,6 @@ function createCard(
     `;
 
 
-    /*
-     * Clicking anywhere on the card
-     * except Download opens details.
-     */
-
     card.addEventListener(
         "click",
         function(event) {
@@ -402,6 +410,26 @@ function createCard(
                 return;
 
             }
+
+
+            /*
+             * Remember which page the user
+             * came from.
+             */
+
+            const currentPage =
+                new URLSearchParams(
+                    window.location.search
+                ).get("page");
+
+
+            sessionStorage.setItem(
+                "extensionCollectionPage",
+                currentPage ===
+                    "dependencies"
+                    ? "dependencies"
+                    : "extensions"
+            );
 
 
             window.location.href =
@@ -430,7 +458,12 @@ function renderDetails(
     search.style.display =
         "none";
 
+
     dependenciesButton.style.display =
+        "none";
+
+
+    mainPageButton.style.display =
         "none";
 
 
@@ -544,19 +577,14 @@ function renderDetails(
         "click",
         function() {
 
-            /*
-             * Return to the correct
-             * collection page.
-             */
-
-            const referrerPage =
+            const previousPage =
                 sessionStorage.getItem(
                     "extensionCollectionPage"
                 );
 
 
             if (
-                referrerPage ===
+                previousPage ===
                 "dependencies"
             ) {
 
@@ -577,18 +605,33 @@ function renderDetails(
 
 
 /* ============================= */
+/* Main Page Button */
+/* ============================= */
+
+mainPageButton.addEventListener(
+    "click",
+    function() {
+
+        sessionStorage.setItem(
+            "extensionCollectionPage",
+            "extensions"
+        );
+
+
+        window.location.href =
+            window.location.pathname;
+
+    }
+);
+
+
+/* ============================= */
 /* Dependencies Button */
 /* ============================= */
 
 dependenciesButton.addEventListener(
     "click",
     function() {
-
-        /*
-         * Remember where the user came from
-         * so the detail-page Back button can
-         * return to the right collection.
-         */
 
         sessionStorage.setItem(
             "extensionCollectionPage",
@@ -629,13 +672,13 @@ search.addEventListener(
             );
 
 
-        /*
-         * Determine which collection
-         * should be searched.
-         */
-
         let source;
 
+
+        /*
+         * Determine which collection
+         * is currently being searched.
+         */
 
         if (
             page ===
@@ -686,7 +729,7 @@ search.addEventListener(
 
 
         /*
-         * Search fields.
+         * Search extension fields.
          */
 
         const filtered =
@@ -730,7 +773,8 @@ search.addEventListener(
 
 
         /*
-         * Render search results.
+         * Render results on the
+         * appropriate page.
          */
 
         if (
