@@ -4,6 +4,7 @@
     box-sizing: border-box;
 }
 
+
 body {
 
     background: #0b0d12;
@@ -12,7 +13,7 @@ body {
 
     font-family:
         Inter,
-        Segoe UI,
+        "Segoe UI",
         Arial,
         sans-serif;
 
@@ -21,7 +22,9 @@ body {
 }
 
 
+/* ============================= */
 /* Header */
+/* ============================= */
 
 .hero {
 
@@ -36,7 +39,8 @@ body {
             #0b0d12 100%
         );
 
-    border-bottom: 1px solid #252b38;
+    border-bottom:
+        1px solid #252b38;
 
 }
 
@@ -63,7 +67,9 @@ body {
 }
 
 
+/* ============================= */
 /* Search */
+/* ============================= */
 
 #search {
 
@@ -75,7 +81,8 @@ body {
 
     border-radius: 12px;
 
-    border: 1px solid #303746;
+    border:
+        1px solid #303746;
 
     background: #161b25;
 
@@ -102,13 +109,15 @@ body {
     border-color: #4f8cff;
 
     box-shadow:
-        0 0 0 3px rgba(79,140,255,.15);
+        0 0 0 3px
+        rgba(79, 140, 255, .15);
 
 }
 
 
-
+/* ============================= */
 /* Main */
+/* ============================= */
 
 main {
 
@@ -119,8 +128,9 @@ main {
 }
 
 
-
-/* Extension grid */
+/* ============================= */
+/* Extension Grid */
+/* ============================= */
 
 .grid {
 
@@ -137,8 +147,9 @@ main {
 }
 
 
-
-/* Cards */
+/* ============================= */
+/* Extension Cards */
+/* ============================= */
 
 .card {
 
@@ -150,9 +161,12 @@ main {
 
     background: #151923;
 
-    border: 1px solid #252c3a;
+    border:
+        1px solid #252c3a;
 
     border-radius: 18px;
+
+    cursor: pointer;
 
     transition:
         transform .2s,
@@ -164,18 +178,21 @@ main {
 
 .card:hover {
 
-    transform: translateY(-6px);
+    transform:
+        translateY(-6px);
 
     border-color: #4f8cff;
 
     box-shadow:
-        0 15px 40px rgba(0,0,0,.35);
+        0 15px 40px
+        rgba(0, 0, 0, .35);
 
 }
 
 
-
-/* Icon */
+/* ============================= */
+/* Extension Icon */
+/* ============================= */
 
 .icon {
 
@@ -194,8 +211,9 @@ main {
 }
 
 
-
-/* Content */
+/* ============================= */
+/* Card Content */
+/* ============================= */
 
 .content {
 
@@ -230,8 +248,9 @@ main {
 }
 
 
-
+/* ============================= */
 /* Metadata */
+/* ============================= */
 
 .meta {
 
@@ -252,7 +271,8 @@ main {
 
     color: #aeb8ca;
 
-    padding: 5px 10px;
+    padding:
+        5px 10px;
 
     border-radius: 20px;
 
@@ -261,8 +281,9 @@ main {
 }
 
 
-
-/* Download button */
+/* ============================= */
+/* Download Button */
+/* ============================= */
 
 .download {
 
@@ -296,8 +317,9 @@ main {
 }
 
 
-
+/* ============================= */
 /* Loading */
+/* ============================= */
 
 .loading {
 
@@ -314,10 +336,179 @@ main {
 }
 
 
+/* ============================= */
+/* Extension Details */
+/* ============================= */
 
+.extension-details {
+
+    width: 100%;
+
+    background: #151923;
+
+    border:
+        1px solid #252c3a;
+
+    border-radius: 18px;
+
+    padding: 35px;
+
+}
+
+
+/* ============================= */
+/* Back Button */
+/* ============================= */
+
+.back-button {
+
+    background: transparent;
+
+    border: none;
+
+    color: #9da6b8;
+
+    font-size: 15px;
+
+    cursor: pointer;
+
+    padding: 0;
+
+    margin-bottom: 35px;
+
+    transition: .2s;
+
+}
+
+
+.back-button:hover {
+
+    color: white;
+
+}
+
+
+/* ============================= */
+/* Details Header */
+/* ============================= */
+
+.details-header {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 30px;
+
+}
+
+
+.details-icon {
+
+    width: 180px;
+
+    height: 180px;
+
+    flex-shrink: 0;
+
+    border-radius: 35px;
+
+    object-fit: cover;
+
+    background: #202635;
+
+}
+
+
+.details-info {
+
+    flex: 1;
+
+}
+
+
+.details-header h1 {
+
+    font-size: 38px;
+
+    margin-bottom: 12px;
+
+}
+
+
+.details-description {
+
+    color: #b0b8c8;
+
+    font-size: 18px;
+
+    line-height: 1.5;
+
+    max-width: 750px;
+
+}
+
+
+/* ============================= */
+/* Details Content */
+/* ============================= */
+
+.details-content {
+
+    margin-top: 45px;
+
+    padding-top: 35px;
+
+    border-top:
+        1px solid #252c3a;
+
+}
+
+
+.details-content h2 {
+
+    font-size: 25px;
+
+    margin-bottom: 15px;
+
+}
+
+
+.details-content p {
+
+    color: #b0b8c8;
+
+    font-size: 16px;
+
+    line-height: 1.7;
+
+    white-space: pre-wrap;
+
+}
+
+
+/* ============================= */
+/* Details Download */
+/* ============================= */
+
+.details-download {
+
+    display: inline-block;
+
+    margin-top: 30px;
+
+    padding-left: 30px;
+
+    padding-right: 30px;
+
+}
+
+
+/* ============================= */
 /* Mobile */
+/* ============================= */
 
-@media(max-width:700px) {
+@media (max-width: 700px) {
 
 
     .hero h1 {
@@ -346,6 +537,54 @@ main {
 
 
     .download {
+
+        width: 100%;
+
+    }
+
+
+    .extension-details {
+
+        padding: 25px;
+
+    }
+
+
+    .details-header {
+
+        flex-direction: column;
+
+        align-items: flex-start;
+
+    }
+
+
+    .details-icon {
+
+        width: 140px;
+
+        height: 140px;
+
+        border-radius: 28px;
+
+    }
+
+
+    .details-header h1 {
+
+        font-size: 30px;
+
+    }
+
+
+    .details-description {
+
+        font-size: 16px;
+
+    }
+
+
+    .details-download {
 
         width: 100%;
 
