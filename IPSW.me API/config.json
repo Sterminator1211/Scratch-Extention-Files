@@ -1,7 +1,9 @@
 {
     "name": "IPSW.me API fetcher",
     "description": "Fetches data from the IPSW.me website API.",
-    "longdescription": "Example Text",
+    "longdescription": "Adds reporters to talk to the IPSW.me API",
+    "state" : "Stable",
+    "statecolor" : "#123524",
     "version": "4.0.0",
     "author": "Sterm"
 }
