@@ -1,0 +1,9 @@
+{
+    "name": "Discord Webhook",
+    "description": "Sends messages to a discord webhook.",
+    "longdescription": "Sends message to the specified Discord Webhook URL, which is also compatible with threads. Since this sends raw messages, this will also accept formatting in the messages.",
+    "state" : "Stable",
+    "statecolor" : "#123524",
+    "version": "2.3.8",
+    "author": "Sterm"
+}
