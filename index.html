@@ -1,45 +1,134 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
 
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
 
     <title>Extension Collection</title>
 
-    <link rel="stylesheet" href="style.css">
+    <link
+        rel="stylesheet"
+        href="style.css"
+    >
 
 </head>
+
+
 <body>
+
+
+    <!-- ========================= -->
+    <!-- Header -->
+    <!-- ========================= -->
 
     <header class="hero">
 
-        <h1>Extension Collection</h1>
+        <h1>
+            Extension Collection
+        </h1>
 
-        <p>Browse special, totally-semi-rare-use-case extensions.</p>
+        <p>
+            Explore and download extensions.
+        </p>
 
-        <input
-            id="search"
-            type="text"
-            placeholder="Search extensions..."
-            autocomplete="off"
-        >
+
+        <!-- ===================== -->
+        <!-- Search -->
+        <!-- ===================== -->
+
+        <div class="search-row">
+
+
+            <button
+                class="dependencies-button"
+                id="dependenciesButton"
+                title="Dependencies"
+                aria-label="Dependencies"
+            >
+
+                <svg
+                    viewBox="0 0 24 24"
+                    aria-hidden="true"
+                >
+
+                    <rect
+                        x="3"
+                        y="4"
+                        width="18"
+                        height="13"
+                        rx="2"
+                    ></rect>
+
+                    <path
+                        d="M8 21h8"
+                    ></path>
+
+                    <path
+                        d="M12 17v4"
+                    ></path>
+
+                    <path
+                        d="M8 8h8"
+                    ></path>
+
+                    <path
+                        d="M8 11h5"
+                    ></path>
+
+                </svg>
+
+            </button>
+
+
+            <input
+                type="text"
+                id="search"
+                placeholder="Search extensions..."
+                autocomplete="off"
+            >
+
+        </div>
 
     </header>
 
+
+
+    <!-- ========================= -->
+    <!-- Main -->
+    <!-- ========================= -->
+
     <main>
 
-        <div id="extensionGrid" class="grid">
+        <div
+            class="grid"
+            id="extensionGrid"
+        >
 
             <div class="loading">
-                Loading extensions...
+                Loading Extensions...
             </div>
 
         </div>
 
     </main>
 
-    <script src="script.js"></script>
+
+
+    <!-- ========================= -->
+    <!-- JavaScript -->
+    <!-- ========================= -->
+
+    <script
+        src="script.js"
+    ></script>
+
 
 </body>
+
 </html>
