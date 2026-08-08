@@ -1,163 +1,206 @@
-import fs from "fs";
-import path from "path";
+const fs = require("fs");
+const path = require("path");
 
-const IGNORE = new Set([
-    "api",
-    ".git",
-    ".github",
-    ".vercel",
-    "node_modules"
-]);
-
-export default function handler(req, res) {
-
+module.exports = function handler(req, res) {
     try {
+        const cwd = process.cwd();
 
-        const root = process.cwd();
-
-        const folders = fs.readdirSync(root, {
+        const entries = fs.readdirSync(cwd, {
             withFileTypes: true
         });
 
         const extensions = [];
 
-        for (const item of folders) {
+        for (const entry of entries) {
 
-            // Only look at folders
-            if (!item.isDirectory()) {
+            /*
+             * Only inspect folders.
+             */
+            if (!entry.isDirectory()) {
                 continue;
             }
 
-            // Ignore system / server folders
-            if (IGNORE.has(item.name)) {
+            /*
+             * Ignore Vercel/internal folders.
+             */
+            if (
+                entry.name === "api" ||
+                entry.name === ".git" ||
+                entry.name === ".vercel" ||
+                entry.name === "node_modules" ||
+                entry.name === "___vc"
+            ) {
                 continue;
             }
 
-            const folderPath = path.join(root, item.name);
-
-            let files;
-
-            try {
-
-                files = fs.readdirSync(folderPath);
-
-            } catch (error) {
-
-                console.log(
-                    `Could not read folder ${item.name}:`,
-                    error.message
-                );
-
-                continue;
-
-            }
-
-            // config.json is required
-            if (!files.includes("config.json")) {
-                continue;
-            }
-
-            // Find the JavaScript file
-            const jsFile = files.find(file =>
-                file.toLowerCase().endsWith(".js")
+            const folderName = entry.name;
+            const folderPath = path.join(
+                cwd,
+                folderName
             );
 
-            // A JavaScript file is required
-            if (!jsFile) {
+            const configPath = path.join(
+                folderPath,
+                "config.json"
+            );
+
+            /*
+             * A folder must contain config.json
+             * to be considered an extension.
+             */
+            if (!fs.existsSync(configPath)) {
                 continue;
             }
 
             let config;
 
             try {
-
                 config = JSON.parse(
                     fs.readFileSync(
-                        path.join(folderPath, "config.json"),
+                        configPath,
                         "utf8"
                     )
                 );
-
             } catch (error) {
-
-                console.log(
-                    `Invalid config.json in ${item.name}:`,
-                    error.message
+                console.error(
+                    `Could not read ${folderName}/config.json:`,
+                    error
                 );
 
                 continue;
-
             }
 
             /*
-             * icon.png is optional.
-             *
-             * If it doesn't exist, the frontend
-             * will use default-icon.png.
+             * Find the JavaScript file.
              */
+            const files = fs.readdirSync(
+                folderPath
+            );
 
-            const hasIcon = files.includes("icon.png");
+            const jsFile = files.find(
+                file =>
+                    file.toLowerCase().endsWith(".js")
+            );
+
+            /*
+             * If there is no JS file,
+             * don't show the folder.
+             */
+            if (!jsFile) {
+                continue;
+            }
+
+            /*
+             * Check for icon.png.
+             */
+            const iconPath = path.join(
+                folderPath,
+                "icon.png"
+            );
+
+            const hasIcon =
+                fs.existsSync(iconPath);
+
+            /*
+             * Defaults.
+             */
+            const name =
+                config.name ||
+                folderName;
+
+            const description =
+                config.description ||
+                "No description provided.";
+
+            const longdescription =
+                config.longdescription ||
+                description;
+
+            const version =
+                config.version ||
+                "Unknown";
+
+            const author =
+                config.author ||
+                "Unknown";
+
+            const state =
+                config.state ||
+                "Stable";
+
+            const statecolor =
+                config.statecolor ||
+                "#486586";
+
+            const type =
+                config.type ||
+                "extension";
+
+            /*
+             * Encode path components so folders/files
+             * containing spaces or special characters work.
+             */
+            const encodedFolder =
+                encodeURIComponent(folderName);
+
+            const encodedJS =
+                encodeURIComponent(jsFile);
 
             extensions.push({
 
-                folder: item.name,
+                folder: folderName,
 
-                name:
-                    config.name ||
-                    item.name,
+                name: name,
 
-                description:
-                    config.description ||
-                    "No description provided.",
+                description: description,
 
                 longdescription:
-                    config.longdescription ||
-                    config.description ||
-                    "No description provided.",
+                    longdescription,
 
-                version:
-                    config.version ||
-                    "Unknown",
+                version: version,
 
-                author:
-                    config.author ||
-                    "Unknown",
+                author: author,
 
-                state:
-                    config.state ||
-                    "Stable",
+                state: state,
 
-                statecolor:
-                    config.statecolor ||
-                    "#486586",
+                statecolor: statecolor,
+
+                type: type,
 
                 icon:
                     hasIcon
-                        ? `/${encodeURIComponent(item.name)}/icon.png`
+                        ? `/${encodedFolder}/icon.png`
                         : "/default-icon.png",
 
                 script:
-                    `/${encodeURIComponent(item.name)}/${encodeURIComponent(jsFile)}`
+                    `/${encodedFolder}/${encodedJS}`
 
             });
-
         }
 
-        // Sort extensions alphabetically
-        extensions.sort((a, b) =>
-            a.name.localeCompare(b.name)
+        /*
+         * Keep the results in alphabetical order.
+         */
+        extensions.sort(
+            (a, b) =>
+                a.name.localeCompare(
+                    b.name
+                )
         );
 
-        res.status(200).json(extensions);
+        res.status(200).json(
+            extensions
+        );
 
     } catch (error) {
 
-        console.error(error);
+        console.error(
+            "Extension API error:",
+            error
+        );
 
         res.status(500).json({
             error: "Failed to load extensions."
         });
-
     }
-
-}
+};
