@@ -1,0 +1,10 @@
+{
+    "name": "Lollipop Dependency",
+    "description": "Used to detect what rendering engine your browser supports.",
+    "longdescription": "Adds way too many blocks to detect different rendering engines that your browser might support",
+    "state" : "Experimental",
+    "statecolor" : "#0a3463",
+    "version": "1.5.0",
+    "author": "Sterm",
+    "type": "dependency"
+}
