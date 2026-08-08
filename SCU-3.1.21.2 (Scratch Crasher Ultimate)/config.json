@@ -1,6 +1,9 @@
 {
     "name": "Scratch Crasher Ultimate",
     "description": "Crashes Scratch (WARNING)",
+    "longdescription": "Adds a block that contains a timer, after that block is triggered, the amount of time on that trigger will be waited then scratch will crash.",
+    "state" : "Stable",
+    "statecolor" : "#123524",
     "version": "3.1.21.2",
     "author": "Sterm"
 }
