@@ -1,6 +1,9 @@
 {
     "name": "Open Weather Map API Fetcher",
     "description": "Adds blocks to read the Open Weather Map API (Requires API Key).",
+    "longdescription": "Adds blocks and reporters to talk to the OWM (Open Weather Map) API",
+    "state" : "Stable",
+    "statecolor" : "#123524",
     "version": "2.6.3",
     "author": "Sterm"
 }
