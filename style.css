@@ -312,19 +312,22 @@ main {
 /* Extension Details */
 /* ============================= */
 
-..extension-details {
+.extension-details {
+    grid-column: 1 / -1;
+
     width: 100%;
-    max-width: 1200px;
-    margin: 0 auto;
 
     padding: 35px;
 
     background: #151923;
 
     border: 1px solid #252c3a;
+
     border-radius: 18px;
 
     box-sizing: border-box;
+
+    overflow: hidden;
 }
 
 
