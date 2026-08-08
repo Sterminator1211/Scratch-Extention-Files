@@ -40,6 +40,7 @@ body {
 .hero h1 {
     font-size: 42px;
     font-weight: 700;
+
     letter-spacing: -1px;
 }
 
@@ -248,28 +249,14 @@ main {
 .meta .state-badge {
     color: white !important;
 
-    background: var(
-        --state-color,
-        #486586
-    ) !important;
+    background:
+        var(--state-color, #486586) !important;
 
     font-weight: 600;
 
     border: none;
 
     box-shadow: none;
-}
-
-
-/*
- * The JavaScript sets the actual color
- * directly on the badge. !important here
- * makes sure the generic .meta span rule
- * cannot overwrite it.
- */
-
-.state-badge[style] {
-    background: inherit !important;
 }
 
 
@@ -462,6 +449,7 @@ main {
     margin-top: 30px;
 
     padding-left: 30px;
+
     padding-right: 30px;
 }
 
@@ -520,4 +508,5 @@ main {
     .details-download {
         width: 100%;
     }
+
 }
