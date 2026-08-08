@@ -1,0 +1,10 @@
+{
+    "name": "Brownie Dependency",
+    "description": "Used to detect what features your browser supports.",
+    "longdescription": "Adds way too many blocks to detect different features that your browser might support. (Also detects browser and OS).",
+    "state" : "Experimental",
+    "statecolor" : "#0a3463",
+    "version": "3.2.4",
+    "author": "Sterm",
+    "type": "dependency"
+}
