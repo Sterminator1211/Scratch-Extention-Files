@@ -1,5 +1,18 @@
-const grid = document.getElementById("extensionGrid");
-const search = document.getElementById("search");
+const grid =
+    document.getElementById(
+        "extensionGrid"
+    );
+
+const search =
+    document.getElementById(
+        "search"
+    );
+
+const dependenciesButton =
+    document.getElementById(
+        "dependenciesButton"
+    );
+
 
 let extensions = [];
 
@@ -13,7 +26,10 @@ async function loadExtensions() {
     try {
 
         const response =
-            await fetch("/api/extensions");
+            await fetch(
+                "/api/extensions"
+            );
+
 
         if (!response.ok) {
 
@@ -23,13 +39,13 @@ async function loadExtensions() {
 
         }
 
+
         extensions =
             await response.json();
 
 
         /*
-         * Check if we're opening
-         * an individual extension.
+         * Read the current URL.
          */
 
         const params =
@@ -37,22 +53,38 @@ async function loadExtensions() {
                 window.location.search
             );
 
-        const extensionName =
-            params.get("extension");
 
+        const extensionName =
+            params.get(
+                "extension"
+            );
+
+
+        const page =
+            params.get(
+                "page"
+            );
+
+
+        /*
+         * Individual extension page.
+         */
 
         if (extensionName) {
 
             const extension =
                 extensions.find(
                     ext =>
-                        ext.folder === extensionName
+                        ext.folder ===
+                        extensionName
                 );
 
 
             if (extension) {
 
-                renderDetails(extension);
+                renderDetails(
+                    extension
+                );
 
                 return;
 
@@ -62,11 +94,26 @@ async function loadExtensions() {
 
 
         /*
-         * Otherwise show the
-         * normal extension grid.
+         * Dependencies page.
          */
 
-        render(extensions);
+        if (
+            page ===
+            "dependencies"
+        ) {
+
+            renderDependencies();
+
+            return;
+
+        }
+
+
+        /*
+         * Normal extension page.
+         */
+
+        renderExtensions();
 
     } catch (error) {
 
@@ -77,9 +124,13 @@ async function loadExtensions() {
 
 
         grid.innerHTML = `
+
             <div class="loading">
+
                 Failed to load extensions.
+
             </div>
+
         `;
 
     }
@@ -88,25 +139,151 @@ async function loadExtensions() {
 
 
 /* ============================= */
-/* Render Extension Cards */
+/* Normal Extensions */
 /* ============================= */
 
-function render(list) {
-
-    /*
-     * Make sure the search bar
-     * is visible on the main page.
-     */
+function renderExtensions(
+    list = null
+) {
 
     search.style.display = "";
 
+    dependenciesButton.classList.remove(
+        "active"
+    );
 
-    if (!list || list.length === 0) {
+
+    const source =
+        list ||
+        extensions.filter(
+            ext =>
+                ext.type !==
+                "dependency"
+        );
+
+
+    renderCards(
+        source
+    );
+
+}
+
+
+/* ============================= */
+/* Dependencies */
+/* ============================= */
+
+function renderDependencies(
+    list = null
+) {
+
+    search.style.display = "";
+
+    dependenciesButton.classList.add(
+        "active"
+    );
+
+
+    const dependencies =
+        list ||
+        extensions.filter(
+            ext =>
+                ext.type ===
+                "dependency"
+        );
+
+
+    grid.innerHTML = `
+
+        <div class="page-title">
+
+            <h1>
+                Dependencies
+            </h1>
+
+            <p>
+                Extensions and resources used
+                as dependencies.
+            </p>
+
+        </div>
+
+    `;
+
+
+    const dependencyGrid =
+        document.createElement(
+            "div"
+        );
+
+
+    dependencyGrid.className =
+        "dependency-grid";
+
+
+    if (
+        dependencies.length ===
+        0
+    ) {
+
+        dependencyGrid.innerHTML = `
+
+            <div class="loading">
+
+                No dependencies found.
+
+            </div>
+
+        `;
+
+    } else {
+
+        dependencies.forEach(
+            extension => {
+
+                dependencyGrid.appendChild(
+                    createCard(
+                        extension
+                    )
+                );
+
+            }
+        );
+
+    }
+
+
+    grid.appendChild(
+        dependencyGrid
+    );
+
+}
+
+
+/* ============================= */
+/* Render Cards */
+/* ============================= */
+
+function renderCards(
+    list
+) {
+
+    grid.innerHTML = "";
+
+
+    if (
+        !list ||
+        list.length === 0
+    ) {
 
         grid.innerHTML = `
+
             <div class="loading">
+
                 No extensions found.
+
             </div>
+
         `;
 
         return;
@@ -114,127 +291,147 @@ function render(list) {
     }
 
 
-    grid.innerHTML = "";
+    list.forEach(
+        extension => {
 
+            grid.appendChild(
+                createCard(
+                    extension
+                )
+            );
 
-    list.forEach(ext => {
-
-        const card =
-            document.createElement("div");
-
-
-        card.className = "card";
-
-
-        /*
-         * Extension card.
-         */
-
-        card.innerHTML = `
-
-            <img
-                class="icon"
-                src="${escapeHTML(ext.icon)}"
-                alt="${escapeHTML(ext.name)}"
-            >
-
-
-            <div class="content">
-
-                <h2>
-                    ${escapeHTML(ext.name)}
-                </h2>
-
-
-                <p>
-                    ${escapeHTML(ext.description)}
-                </p>
-
-
-                <div class="meta">
-
-                    <span>
-                        ${escapeHTML(ext.version)}
-                    </span>
-
-
-                    <span>
-                        ${escapeHTML(ext.author)}
-                    </span>
-
-
-                    <span
-                        class="state-badge"
-                        style="--state-color: ${escapeHTML(ext.statecolor)}"
-                    >
-                        ${escapeHTML(ext.state)}
-                    </span>
-
-                </div>
-
-
-                <a
-                    class="download"
-                    href="${escapeHTML(ext.script)}"
-                    download
-                >
-                    Download
-                </a>
-
-            </div>
-
-        `;
-
-
-        /*
-         * Clicking the card opens
-         * the extension detail page.
-         *
-         * Clicking Download does not.
-         */
-
-        card.addEventListener(
-            "click",
-            function(event) {
-
-                if (
-                    event.target.closest(".download")
-                ) {
-
-                    return;
-
-                }
-
-
-                window.location.href =
-                    "?extension=" +
-                    encodeURIComponent(
-                        ext.folder
-                    );
-
-            }
-        );
-
-
-        grid.appendChild(card);
-
-    });
+        }
+    );
 
 }
 
 
 /* ============================= */
-/* Render Extension Details */
+/* Create Card */
 /* ============================= */
 
-function renderDetails(ext) {
+function createCard(
+    ext
+) {
+
+    const card =
+        document.createElement(
+            "div"
+        );
+
+
+    card.className =
+        "card";
+
+
+    card.innerHTML = `
+
+        <img
+            class="icon"
+            src="${escapeHTML(ext.icon)}"
+            alt="${escapeHTML(ext.name)}"
+        >
+
+
+        <div class="content">
+
+
+            <h2>
+                ${escapeHTML(ext.name)}
+            </h2>
+
+
+            <p>
+                ${escapeHTML(ext.description)}
+            </p>
+
+
+            <div class="meta">
+
+
+                <span>
+                    ${escapeHTML(ext.version)}
+                </span>
+
+
+                <span>
+                    ${escapeHTML(ext.author)}
+                </span>
+
+
+                <span
+                    class="state-badge"
+                    style="--state-color: ${escapeHTML(ext.statecolor)}"
+                >
+                    ${escapeHTML(ext.state)}
+                </span>
+
+
+            </div>
+
+
+            <a
+                class="download"
+                href="${escapeHTML(ext.script)}"
+                download
+            >
+                Download
+            </a>
+
+
+        </div>
+
+    `;
+
 
     /*
-     * Hide search while viewing
-     * an individual extension.
+     * Clicking anywhere on the card
+     * except Download opens details.
      */
 
-    search.style.display = "none";
+    card.addEventListener(
+        "click",
+        function(event) {
+
+            if (
+                event.target.closest(
+                    ".download"
+                )
+            ) {
+
+                return;
+
+            }
+
+
+            window.location.href =
+                "?extension=" +
+                encodeURIComponent(
+                    ext.folder
+                );
+
+        }
+    );
+
+
+    return card;
+
+}
+
+
+/* ============================= */
+/* Extension Details */
+/* ============================= */
+
+function renderDetails(
+    ext
+) {
+
+    search.style.display =
+        "none";
+
+    dependenciesButton.style.display =
+        "none";
 
 
     grid.innerHTML = `
@@ -268,7 +465,9 @@ function renderDetails(ext) {
                     </h1>
 
 
-                    <p class="details-description">
+                    <p
+                        class="details-description"
+                    >
                         ${escapeHTML(ext.description)}
                     </p>
 
@@ -335,10 +534,6 @@ function renderDetails(ext) {
     `;
 
 
-    /*
-     * Back button.
-     */
-
     const backButton =
         document.getElementById(
             "backButton"
@@ -347,27 +542,65 @@ function renderDetails(ext) {
 
     backButton.addEventListener(
         "click",
-        goBack
+        function() {
+
+            /*
+             * Return to the correct
+             * collection page.
+             */
+
+            const referrerPage =
+                sessionStorage.getItem(
+                    "extensionCollectionPage"
+                );
+
+
+            if (
+                referrerPage ===
+                "dependencies"
+            ) {
+
+                window.location.href =
+                    "?page=dependencies";
+
+            } else {
+
+                window.location.href =
+                    window.location.pathname;
+
+            }
+
+        }
     );
 
 }
 
 
 /* ============================= */
-/* Back To Extensions */
+/* Dependencies Button */
 /* ============================= */
 
-function goBack() {
+dependenciesButton.addEventListener(
+    "click",
+    function() {
 
-    /*
-     * Remove the ?extension=...
-     * query parameter.
-     */
+        /*
+         * Remember where the user came from
+         * so the detail-page Back button can
+         * return to the right collection.
+         */
 
-    window.location.href =
-        window.location.pathname;
+        sessionStorage.setItem(
+            "extensionCollectionPage",
+            "dependencies"
+        );
 
-}
+
+        window.location.href =
+            "?page=dependencies";
+
+    }
+);
 
 
 /* ============================= */
@@ -384,67 +617,109 @@ search.addEventListener(
                 .trim();
 
 
+        const params =
+            new URLSearchParams(
+                window.location.search
+            );
+
+
+        const page =
+            params.get(
+                "page"
+            );
+
+
         /*
-         * If the search box is empty,
-         * show everything.
+         * Determine which collection
+         * should be searched.
+         */
+
+        let source;
+
+
+        if (
+            page ===
+            "dependencies"
+        ) {
+
+            source =
+                extensions.filter(
+                    ext =>
+                        ext.type ===
+                        "dependency"
+                );
+
+        } else {
+
+            source =
+                extensions.filter(
+                    ext =>
+                        ext.type !==
+                        "dependency"
+                );
+
+        }
+
+
+        /*
+         * Empty search.
          */
 
         if (!value) {
 
-            render(extensions);
+            if (
+                page ===
+                "dependencies"
+            ) {
+
+                renderDependencies();
+
+            } else {
+
+                renderExtensions();
+
+            }
 
             return;
 
         }
 
 
+        /*
+         * Search fields.
+         */
+
         const filtered =
-            extensions.filter(
-                function(ext) {
+            source.filter(
+                ext => {
 
                     return (
-
-                        /*
-                         * Search extension name
-                         */
 
                         ext.name
                             .toLowerCase()
                             .includes(value)
 
-
                         ||
-
-
-                        /*
-                         * Search description
-                         */
 
                         ext.description
                             .toLowerCase()
                             .includes(value)
 
-
                         ||
-
-
-                        /*
-                         * Search author
-                         */
 
                         ext.author
                             .toLowerCase()
                             .includes(value)
 
+                        ||
+
+                        ext.state
+                            .toLowerCase()
+                            .includes(value)
 
                         ||
 
-
-                        /*
-                         * Search state
-                         */
-
-                        ext.state
+                        ext.version
                             .toLowerCase()
                             .includes(value)
 
@@ -454,7 +729,26 @@ search.addEventListener(
             );
 
 
-        render(filtered);
+        /*
+         * Render search results.
+         */
+
+        if (
+            page ===
+            "dependencies"
+        ) {
+
+            renderDependencies(
+                filtered
+            );
+
+        } else {
+
+            renderExtensions(
+                filtered
+            );
+
+        }
 
     }
 );
@@ -464,10 +758,14 @@ search.addEventListener(
 /* HTML Escaping */
 /* ============================= */
 
-function escapeHTML(value) {
+function escapeHTML(
+    value
+) {
 
     const div =
-        document.createElement("div");
+        document.createElement(
+            "div"
+        );
 
 
     div.textContent =
@@ -482,7 +780,7 @@ function escapeHTML(value) {
 
 
 /* ============================= */
-/* Start Website */
+/* Start */
 /* ============================= */
 
 loadExtensions();
