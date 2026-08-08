@@ -1,6 +1,9 @@
 {
     "name": "YouTube Utilities",
     "description": "Adds blocks that can search channels, videos and comments!",
+    "longdescription": "Adds blocks for searching various info about channels, videos and comments (REQUIRES API KEY).",
+    "state" : "Stable",
+    "statecolor" : "#123524",
     "version": "42.5.1",
     "author": "Sterm"
 }
