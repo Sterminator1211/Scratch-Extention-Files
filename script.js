@@ -1,163 +1,369 @@
-import fs from "fs";
-import path from "path";
+const grid = document.getElementById("extensionGrid");
+const search = document.getElementById("search");
 
-const IGNORE = new Set([
-    "api",
-    ".git",
-    ".github",
-    ".vercel",
-    "node_modules"
-]);
+let extensions = [];
 
-export default function handler(req, res) {
+
+/* ============================= */
+/* Load Extensions */
+/* ============================= */
+
+async function loadExtensions() {
 
     try {
 
-        const root = process.cwd();
+        const response = await fetch("/api/extensions");
 
-        const folders = fs.readdirSync(root, {
-            withFileTypes: true
-        });
-
-        const extensions = [];
-
-        for (const item of folders) {
-
-            // Only look at folders
-            if (!item.isDirectory()) {
-                continue;
-            }
-
-            // Ignore system / server folders
-            if (IGNORE.has(item.name)) {
-                continue;
-            }
-
-            const folderPath = path.join(root, item.name);
-
-            let files;
-
-            try {
-
-                files = fs.readdirSync(folderPath);
-
-            } catch (error) {
-
-                console.log(
-                    `Could not read folder ${item.name}:`,
-                    error.message
-                );
-
-                continue;
-
-            }
-
-            // config.json is required
-            if (!files.includes("config.json")) {
-                continue;
-            }
-
-            // Find the JavaScript file
-            const jsFile = files.find(file =>
-                file.toLowerCase().endsWith(".js")
+        if (!response.ok) {
+            throw new Error(
+                `API returned ${response.status}`
             );
+        }
 
-            // A JavaScript file is required
-            if (!jsFile) {
-                continue;
-            }
+        extensions = await response.json();
 
-            let config;
+        const params =
+            new URLSearchParams(window.location.search);
 
-            try {
+        const extensionName =
+            params.get("extension");
 
-                config = JSON.parse(
-                    fs.readFileSync(
-                        path.join(folderPath, "config.json"),
-                        "utf8"
-                    )
+        if (extensionName) {
+
+            const extension =
+                extensions.find(
+                    ext => ext.folder === extensionName
                 );
 
-            } catch (error) {
-
-                console.log(
-                    `Invalid config.json in ${item.name}:`,
-                    error.message
-                );
-
-                continue;
-
+            if (extension) {
+                renderDetails(extension);
+                return;
             }
-
-            /*
-             * icon.png is optional.
-             *
-             * If it doesn't exist, the frontend
-             * will use default-icon.png.
-             */
-
-            const hasIcon = files.includes("icon.png");
-
-            extensions.push({
-
-                folder: item.name,
-
-                name:
-                    config.name ||
-                    item.name,
-
-                description:
-                    config.description ||
-                    "No description provided.",
-
-                longdescription:
-                    config.longdescription ||
-                    config.description ||
-                    "No description provided.",
-
-                version:
-                    config.version ||
-                    "Unknown",
-
-                author:
-                    config.author ||
-                    "Unknown",
-
-                state:
-                    config.state ||
-                    "Stable",
-
-                statecolor:
-                    config.statecolor ||
-                    "#486586",
-
-                icon:
-                    hasIcon
-                        ? `/${encodeURIComponent(item.name)}/icon.png`
-                        : "/default-icon.png",
-
-                script:
-                    `/${encodeURIComponent(item.name)}/${encodeURIComponent(jsFile)}`
-
-            });
 
         }
 
-        // Sort extensions alphabetically
-        extensions.sort((a, b) =>
-            a.name.localeCompare(b.name)
-        );
-
-        res.status(200).json(extensions);
+        render(extensions);
 
     } catch (error) {
 
-        console.error(error);
+        console.error(
+            "Extension loading error:",
+            error
+        );
 
-        res.status(500).json({
-            error: "Failed to load extensions."
-        });
+        grid.innerHTML = `
+            <div class="loading">
+                Failed to load extensions.
+            </div>
+        `;
 
     }
 
 }
+
+
+/* ============================= */
+/* Render Extension Cards */
+/* ============================= */
+
+function render(list) {
+
+    search.style.display = "";
+
+    if (!list || list.length === 0) {
+
+        grid.innerHTML = `
+            <div class="loading">
+                No extensions found.
+            </div>
+        `;
+
+        return;
+
+    }
+
+    grid.innerHTML = "";
+
+    list.forEach(ext => {
+
+        const card =
+            document.createElement("div");
+
+        card.className = "card";
+
+        /* Card HTML */
+
+        card.innerHTML = `
+
+            <img
+                class="icon"
+                src="${ext.icon}"
+                alt="${escapeHTML(ext.name)}"
+            >
+
+            <div class="content">
+
+                <h2>
+                    ${escapeHTML(ext.name)}
+                </h2>
+
+                <p>
+                    ${escapeHTML(ext.description)}
+                </p>
+
+                <div class="meta">
+
+                    <span>
+                        ${escapeHTML(ext.version)}
+                    </span>
+
+                    <span>
+                        ${escapeHTML(ext.author)}
+                    </span>
+
+                    <span
+                        class="state-badge"
+                        style="background-color: ${escapeHTML(ext.statecolor)}"
+                    >
+                        ${escapeHTML(ext.state)}
+                    </span>
+
+                </div>
+
+                <a
+                    class="download"
+                    href="${ext.script}"
+                    download
+                >
+                    Download
+                </a>
+
+            </div>
+
+        `;
+
+
+        /* Open extension page */
+
+        card.addEventListener(
+            "click",
+            function(event) {
+
+                /*
+                 * Don't open the detail page when
+                 * the Download button is clicked.
+                 */
+
+                if (
+                    event.target.closest(".download")
+                ) {
+                    return;
+                }
+
+                window.location.href =
+                    "?extension=" +
+                    encodeURIComponent(ext.folder);
+
+            }
+        );
+
+
+        grid.appendChild(card);
+
+    });
+
+}
+
+
+/* ============================= */
+/* Render Extension Details */
+/* ============================= */
+
+function renderDetails(ext) {
+
+    search.style.display = "none";
+
+    grid.innerHTML = `
+
+        <div class="extension-details">
+
+            <button
+                class="back-button"
+                id="backButton"
+            >
+                ← Back to Extensions
+            </button>
+
+
+            <div class="details-header">
+
+                <img
+                    class="details-icon"
+                    src="${ext.icon}"
+                    alt="${escapeHTML(ext.name)}"
+                >
+
+
+                <div class="details-info">
+
+                    <h1>
+                        ${escapeHTML(ext.name)}
+                    </h1>
+
+                    <p class="details-description">
+                        ${escapeHTML(ext.description)}
+                    </p>
+
+
+                    <div class="meta">
+
+                        <span>
+                            ${escapeHTML(ext.version)}
+                        </span>
+
+                        <span>
+                            ${escapeHTML(ext.author)}
+                        </span>
+
+                        <span
+                            class="state-badge"
+                            style="background-color: ${escapeHTML(ext.statecolor)}"
+                        >
+                            ${escapeHTML(ext.state)}
+                        </span>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="details-content">
+
+                <h2>
+                    About this extension
+                </h2>
+
+                <p>
+                    ${escapeHTML(ext.longdescription)}
+                </p>
+
+
+                <a
+                    class="download details-download"
+                    href="${ext.script}"
+                    download
+                >
+                    Download Extension
+                </a>
+
+            </div>
+
+        </div>
+
+    `;
+
+
+    /* Back button */
+
+    document
+        .getElementById("backButton")
+        .addEventListener(
+            "click",
+            goBack
+        );
+
+}
+
+
+/* ============================= */
+/* Back To Extensions */
+/* ============================= */
+
+function goBack() {
+
+    window.location.href =
+        window.location.pathname;
+
+}
+
+
+/* ============================= */
+/* Search */
+/* ============================= */
+
+search.addEventListener(
+    "input",
+    function() {
+
+        const value =
+            search.value
+                .toLowerCase()
+                .trim();
+
+
+        const filtered =
+            extensions.filter(
+                function(ext) {
+
+                    return (
+
+                        ext.name
+                            .toLowerCase()
+                            .includes(value)
+
+                        ||
+
+                        ext.description
+                            .toLowerCase()
+                            .includes(value)
+
+                        ||
+
+                        ext.author
+                            .toLowerCase()
+                            .includes(value)
+
+                        ||
+
+                        ext.state
+                            .toLowerCase()
+                            .includes(value)
+
+                    );
+
+                }
+            );
+
+
+        render(filtered);
+
+    }
+);
+
+
+/* ============================= */
+/* HTML Escaping */
+/* ============================= */
+
+function escapeHTML(value) {
+
+    const div =
+        document.createElement("div");
+
+    div.textContent =
+        value == null
+            ? ""
+            : String(value);
+
+    return div.innerHTML;
+
+}
+
+
+/* ============================= */
+/* Start */
+/* ============================= */
+
+loadExtensions();
