@@ -312,18 +312,19 @@ main {
 /* Extension Details */
 /* ============================= */
 
-.extension-details {
+..extension-details {
     width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+
+    padding: 35px;
 
     background: #151923;
 
     border: 1px solid #252c3a;
-
     border-radius: 18px;
 
-    padding: 35px;
-
-    overflow: hidden;
+    box-sizing: border-box;
 }
 
 
