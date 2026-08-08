@@ -1,6 +1,9 @@
 {
     "name": "Sound Effects",
     "description": "Adds Old, Popular Sound Effects!",
+    "longdescription": "Adds SFX Blocks that play the suggested sound.",
+    "state" : "Stable",
+    "statecolor" : "#123524",
     "version": "8.9.1",
     "author": "Sterm"
 }
