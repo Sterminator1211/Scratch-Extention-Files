@@ -28,7 +28,7 @@ export default function handler(req, res) {
                 continue;
             }
 
-            // Ignore Vercel/system folders
+            // Ignore system / server folders
             if (IGNORE.has(item.name)) {
                 continue;
             }
@@ -92,9 +92,10 @@ export default function handler(req, res) {
             /*
              * icon.png is optional.
              *
-             * If it doesn't exist, the frontend will
-             * use the default icon.
+             * If it doesn't exist, the frontend
+             * will use default-icon.png.
              */
+
             const hasIcon = files.includes("icon.png");
 
             extensions.push({
@@ -122,6 +123,14 @@ export default function handler(req, res) {
                     config.author ||
                     "Unknown",
 
+                state:
+                    config.state ||
+                    "Stable",
+
+                statecolor:
+                    config.statecolor ||
+                    "#486586",
+
                 icon:
                     hasIcon
                         ? `/${encodeURIComponent(item.name)}/icon.png`
@@ -134,7 +143,7 @@ export default function handler(req, res) {
 
         }
 
-        // Sort alphabetically
+        // Sort extensions alphabetically
         extensions.sort((a, b) =>
             a.name.localeCompare(b.name)
         );
