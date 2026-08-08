@@ -1,353 +1,163 @@
-const grid = document.getElementById("extensionGrid");
-const search = document.getElementById("search");
+import fs from "fs";
+import path from "path";
 
-let extensions = [];
+const IGNORE = new Set([
+    "api",
+    ".git",
+    ".github",
+    ".vercel",
+    "node_modules"
+]);
 
-
-/*
- * Load extensions from the Vercel API
- */
-
-async function loadExtensions() {
-
-    grid.innerHTML = `
-        <div class="loading">
-            Loading extensions...
-        </div>
-    `;
+export default function handler(req, res) {
 
     try {
 
-        const response = await fetch("/api/extensions");
+        const root = process.cwd();
 
-        if (!response.ok) {
-            throw new Error("Failed to load extensions.");
-        }
+        const folders = fs.readdirSync(root, {
+            withFileTypes: true
+        });
 
-        extensions = await response.json();
+        const extensions = [];
 
-        /*
-         * Check whether the URL contains an extension.
-         *
-         * Example:
-         * ?extension=UUID%20Generator
-         */
+        for (const item of folders) {
 
-        const params =
-            new URLSearchParams(window.location.search);
+            // Only look at folders
+            if (!item.isDirectory()) {
+                continue;
+            }
 
-        const extensionName =
-            params.get("extension");
+            // Ignore system / server folders
+            if (IGNORE.has(item.name)) {
+                continue;
+            }
 
-        if (extensionName) {
+            const folderPath = path.join(root, item.name);
 
-            const extension =
-                extensions.find(
-                    ext => ext.folder === extensionName
+            let files;
+
+            try {
+
+                files = fs.readdirSync(folderPath);
+
+            } catch (error) {
+
+                console.log(
+                    `Could not read folder ${item.name}:`,
+                    error.message
                 );
 
-            if (extension) {
-
-                renderDetails(extension);
-
-                return;
+                continue;
 
             }
 
+            // config.json is required
+            if (!files.includes("config.json")) {
+                continue;
+            }
+
+            // Find the JavaScript file
+            const jsFile = files.find(file =>
+                file.toLowerCase().endsWith(".js")
+            );
+
+            // A JavaScript file is required
+            if (!jsFile) {
+                continue;
+            }
+
+            let config;
+
+            try {
+
+                config = JSON.parse(
+                    fs.readFileSync(
+                        path.join(folderPath, "config.json"),
+                        "utf8"
+                    )
+                );
+
+            } catch (error) {
+
+                console.log(
+                    `Invalid config.json in ${item.name}:`,
+                    error.message
+                );
+
+                continue;
+
+            }
+
+            /*
+             * icon.png is optional.
+             *
+             * If it doesn't exist, the frontend
+             * will use default-icon.png.
+             */
+
+            const hasIcon = files.includes("icon.png");
+
+            extensions.push({
+
+                folder: item.name,
+
+                name:
+                    config.name ||
+                    item.name,
+
+                description:
+                    config.description ||
+                    "No description provided.",
+
+                longdescription:
+                    config.longdescription ||
+                    config.description ||
+                    "No description provided.",
+
+                version:
+                    config.version ||
+                    "Unknown",
+
+                author:
+                    config.author ||
+                    "Unknown",
+
+                state:
+                    config.state ||
+                    "Stable",
+
+                statecolor:
+                    config.statecolor ||
+                    "#486586",
+
+                icon:
+                    hasIcon
+                        ? `/${encodeURIComponent(item.name)}/icon.png`
+                        : "/default-icon.png",
+
+                script:
+                    `/${encodeURIComponent(item.name)}/${encodeURIComponent(jsFile)}`
+
+            });
+
         }
 
-        render(extensions);
+        // Sort extensions alphabetically
+        extensions.sort((a, b) =>
+            a.name.localeCompare(b.name)
+        );
+
+        res.status(200).json(extensions);
 
     } catch (error) {
 
         console.error(error);
 
-        grid.innerHTML = `
-            <div class="loading">
-                Failed to load extensions.
-            </div>
-        `;
-
-    }
-
-}
-
-
-/*
- * Render extension cards
- */
-
-function render(list) {
-
-    /*
-     * Make sure the search bar is visible
-     * when we're on the main extension page.
-     */
-
-    search.style.display = "";
-
-    if (list.length === 0) {
-
-        grid.innerHTML = `
-            <div class="loading">
-                No extensions found.
-            </div>
-        `;
-
-        return;
-
-    }
-
-    grid.innerHTML = "";
-
-    for (const ext of list) {
-
-        const card =
-            document.createElement("div");
-
-        card.className = "card";
-
-        card.innerHTML = `
-
-            <img
-                class="icon"
-                src="${ext.icon}"
-                alt="${escapeHTML(ext.name)}"
-            >
-
-            <div class="content">
-
-                <h2>
-                    ${escapeHTML(ext.name)}
-                </h2>
-
-                <p>
-                    ${escapeHTML(ext.description)}
-                </p>
-
-                <div class="meta">
-
-                    <span>
-                        ${escapeHTML(ext.version)}
-                    </span>
-
-                    <span>
-                        ${escapeHTML(ext.author)}
-                    </span>
-
-                </div>
-
-                <a
-                    class="download"
-                    href="${ext.script}"
-                    download
-                >
-                    Download
-                </a>
-
-            </div>
-
-        `;
-
-
-        /*
-         * Clicking the card opens the detail page.
-         *
-         * Clicking Download does NOT open the
-         * detail page.
-         */
-
-        card.addEventListener("click", event => {
-
-            if (
-                event.target.closest(".download")
-            ) {
-
-                return;
-
-            }
-
-            window.location.href =
-                `?extension=${encodeURIComponent(
-                    ext.folder
-                )}`;
-
+        res.status(500).json({
+            error: "Failed to load extensions."
         });
 
-
-        grid.appendChild(card);
-
     }
 
 }
-
-
-/*
- * Render extension detail page
- */
-
-function renderDetails(ext) {
-
-    /*
-     * Hide the search bar while viewing
-     * an individual extension.
-     */
-
-    search.style.display = "none";
-
-
-    grid.innerHTML = `
-
-        <div class="extension-details">
-
-            <button
-                class="back-button"
-                onclick="goBack()"
-            >
-                ← Back to Extensions
-            </button>
-
-
-            <div class="details-header">
-
-                <img
-                    class="details-icon"
-                    src="${ext.icon}"
-                    alt="${escapeHTML(ext.name)}"
-                >
-
-
-                <div class="details-info">
-
-                    <h1>
-                        ${escapeHTML(ext.name)}
-                    </h1>
-
-                    <p class="details-description">
-                        ${escapeHTML(ext.description)}
-                    </p>
-
-
-                    <div class="meta">
-
-                        <span>
-                            ${escapeHTML(ext.version)}
-                        </span>
-
-                        <span>
-                            ${escapeHTML(ext.author)}
-                        </span>
-
-                    </div>
-
-                </div>
-
-            </div>
-
-
-            <div class="details-content">
-
-                <h2>
-                    About this extension
-                </h2>
-
-                <p>
-                    ${escapeHTML(ext.longdescription)}
-                </p>
-
-
-                <a
-                    class="download details-download"
-                    href="${ext.script}"
-                    download
-                >
-                    Download Extension
-                </a>
-
-            </div>
-
-        </div>
-
-    `;
-
-}
-
-
-/*
- * Return to the main extension page
- */
-
-function goBack() {
-
-    window.location.href =
-        window.location.pathname;
-
-}
-
-
-/*
- * Escape user/config-provided text before
- * inserting it into HTML.
- */
-
-function escapeHTML(value) {
-
-    const div =
-        document.createElement("div");
-
-    div.textContent =
-        value ?? "";
-
-    return div.innerHTML;
-
-}
-
-
-/*
- * Search
- */
-
-search.addEventListener("input", () => {
-
-    const value =
-        search.value
-            .toLowerCase()
-            .trim();
-
-
-    const filtered =
-        extensions.filter(ext => {
-
-            return (
-
-                ext.name
-                    .toLowerCase()
-                    .includes(value)
-
-                ||
-
-                ext.description
-                    .toLowerCase()
-                    .includes(value)
-
-                ||
-
-                ext.author
-                    .toLowerCase()
-                    .includes(value)
-
-            );
-
-        });
-
-
-    render(filtered);
-
-});
-
-
-/*
- * Start the website
- */
-
-loadExtensions();
