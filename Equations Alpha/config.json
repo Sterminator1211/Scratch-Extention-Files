@@ -1,6 +1,9 @@
 {
     "name": "Equations+",
     "description": "Adds more math blocks.",
+    "longdescription": "Adds reporters to do extra math not in normal scratch.",
+    "state" : "Stable",
+    "statecolor" : "#123524",
     "version": "3.14.159",
     "author": "Sterm"
 }
