@@ -1,6 +1,9 @@
 {
     "name": "Randomness Utilities",
     "description": "Quite a few blocks for generating random types of stuff.",
+    "longdescription": "Adds randomizer blocks for almost every type of input.",
+    "state" : "Stable",
+    "statecolor" : "#123524",
     "version": "1.3.1",
     "author": "Sterm"
 }
