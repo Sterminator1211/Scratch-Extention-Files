@@ -1,6 +1,9 @@
 {
     "name": "Remote Hats",
     "description": "Remotely Triggered blocks..",
+    "longdescription": "Adds hats and blocks to remotely trigger each other, like a worse versions of custom blocks.",
+    "state" : "Stable",
+    "statecolor" : "#123524",
     "version": "2.1.2",
     "author": "Sterm"
 }
