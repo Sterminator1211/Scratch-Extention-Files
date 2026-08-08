@@ -12,35 +12,59 @@ async function loadExtensions() {
 
     try {
 
-        const response = await fetch("/api/extensions");
+        const response =
+            await fetch("/api/extensions");
 
         if (!response.ok) {
+
             throw new Error(
                 `API returned ${response.status}`
             );
+
         }
 
-        extensions = await response.json();
+        extensions =
+            await response.json();
+
+
+        /*
+         * Check if we're opening
+         * an individual extension.
+         */
 
         const params =
-            new URLSearchParams(window.location.search);
+            new URLSearchParams(
+                window.location.search
+            );
 
         const extensionName =
             params.get("extension");
+
 
         if (extensionName) {
 
             const extension =
                 extensions.find(
-                    ext => ext.folder === extensionName
+                    ext =>
+                        ext.folder === extensionName
                 );
 
+
             if (extension) {
+
                 renderDetails(extension);
+
                 return;
+
             }
 
         }
+
+
+        /*
+         * Otherwise show the
+         * normal extension grid.
+         */
 
         render(extensions);
 
@@ -50,6 +74,7 @@ async function loadExtensions() {
             "Extension loading error:",
             error
         );
+
 
         grid.innerHTML = `
             <div class="loading">
@@ -68,7 +93,13 @@ async function loadExtensions() {
 
 function render(list) {
 
+    /*
+     * Make sure the search bar
+     * is visible on the main page.
+     */
+
     search.style.display = "";
+
 
     if (!list || list.length === 0) {
 
@@ -82,24 +113,31 @@ function render(list) {
 
     }
 
+
     grid.innerHTML = "";
+
 
     list.forEach(ext => {
 
         const card =
             document.createElement("div");
 
+
         card.className = "card";
 
-        /* Card HTML */
+
+        /*
+         * Extension card.
+         */
 
         card.innerHTML = `
 
             <img
                 class="icon"
-                src="${ext.icon}"
+                src="${escapeHTML(ext.icon)}"
                 alt="${escapeHTML(ext.name)}"
             >
+
 
             <div class="content">
 
@@ -107,9 +145,11 @@ function render(list) {
                     ${escapeHTML(ext.name)}
                 </h2>
 
+
                 <p>
                     ${escapeHTML(ext.description)}
                 </p>
+
 
                 <div class="meta">
 
@@ -117,9 +157,11 @@ function render(list) {
                         ${escapeHTML(ext.version)}
                     </span>
 
+
                     <span>
                         ${escapeHTML(ext.author)}
                     </span>
+
 
                     <span
                         class="state-badge"
@@ -130,9 +172,10 @@ function render(list) {
 
                 </div>
 
+
                 <a
                     class="download"
-                    href="${ext.script}"
+                    href="${escapeHTML(ext.script)}"
                     download
                 >
                     Download
@@ -143,26 +186,31 @@ function render(list) {
         `;
 
 
-        /* Open extension page */
+        /*
+         * Clicking the card opens
+         * the extension detail page.
+         *
+         * Clicking Download does not.
+         */
 
         card.addEventListener(
             "click",
             function(event) {
 
-                /*
-                 * Don't open the detail page when
-                 * the Download button is clicked.
-                 */
-
                 if (
                     event.target.closest(".download")
                 ) {
+
                     return;
+
                 }
+
 
                 window.location.href =
                     "?extension=" +
-                    encodeURIComponent(ext.folder);
+                    encodeURIComponent(
+                        ext.folder
+                    );
 
             }
         );
@@ -181,11 +229,18 @@ function render(list) {
 
 function renderDetails(ext) {
 
+    /*
+     * Hide search while viewing
+     * an individual extension.
+     */
+
     search.style.display = "none";
+
 
     grid.innerHTML = `
 
         <div class="extension-details">
+
 
             <button
                 class="back-button"
@@ -197,18 +252,21 @@ function renderDetails(ext) {
 
             <div class="details-header">
 
+
                 <img
                     class="details-icon"
-                    src="${ext.icon}"
+                    src="${escapeHTML(ext.icon)}"
                     alt="${escapeHTML(ext.name)}"
                 >
 
 
                 <div class="details-info">
 
+
                     <h1>
                         ${escapeHTML(ext.name)}
                     </h1>
+
 
                     <p class="details-description">
                         ${escapeHTML(ext.description)}
@@ -217,13 +275,16 @@ function renderDetails(ext) {
 
                     <div class="meta">
 
+
                         <span>
                             ${escapeHTML(ext.version)}
                         </span>
 
+
                         <span>
                             ${escapeHTML(ext.author)}
                         </span>
+
 
                         <span
                             class="state-badge"
@@ -232,47 +293,62 @@ function renderDetails(ext) {
                             ${escapeHTML(ext.state)}
                         </span>
 
+
                     </div>
 
+
                 </div>
+
 
             </div>
 
 
             <div class="details-content">
 
+
                 <h2>
                     About this extension
                 </h2>
 
+
                 <p>
-                    ${escapeHTML(ext.longdescription)}
+                    ${escapeHTML(
+                        ext.longdescription
+                    )}
                 </p>
 
 
                 <a
                     class="download details-download"
-                    href="${ext.script}"
+                    href="${escapeHTML(ext.script)}"
                     download
                 >
                     Download Extension
                 </a>
 
+
             </div>
+
 
         </div>
 
     `;
 
 
-    /* Back button */
+    /*
+     * Back button.
+     */
 
-    document
-        .getElementById("backButton")
-        .addEventListener(
-            "click",
-            goBack
+    const backButton =
+        document.getElementById(
+            "backButton"
         );
+
+
+    backButton.addEventListener(
+        "click",
+        goBack
+    );
 
 }
 
@@ -282,6 +358,11 @@ function renderDetails(ext) {
 /* ============================= */
 
 function goBack() {
+
+    /*
+     * Remove the ?extension=...
+     * query parameter.
+     */
 
     window.location.href =
         window.location.pathname;
@@ -303,29 +384,65 @@ search.addEventListener(
                 .trim();
 
 
+        /*
+         * If the search box is empty,
+         * show everything.
+         */
+
+        if (!value) {
+
+            render(extensions);
+
+            return;
+
+        }
+
+
         const filtered =
             extensions.filter(
                 function(ext) {
 
                     return (
 
+                        /*
+                         * Search extension name
+                         */
+
                         ext.name
                             .toLowerCase()
                             .includes(value)
 
+
                         ||
+
+
+                        /*
+                         * Search description
+                         */
 
                         ext.description
                             .toLowerCase()
                             .includes(value)
 
+
                         ||
+
+
+                        /*
+                         * Search author
+                         */
 
                         ext.author
                             .toLowerCase()
                             .includes(value)
 
+
                         ||
+
+
+                        /*
+                         * Search state
+                         */
 
                         ext.state
                             .toLowerCase()
@@ -352,10 +469,12 @@ function escapeHTML(value) {
     const div =
         document.createElement("div");
 
+
     div.textContent =
         value == null
             ? ""
             : String(value);
+
 
     return div.innerHTML;
 
@@ -363,7 +482,7 @@ function escapeHTML(value) {
 
 
 /* ============================= */
-/* Start */
+/* Start Website */
 /* ============================= */
 
 loadExtensions();
