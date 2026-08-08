@@ -4,6 +4,6 @@
     "longdescription": "Adds blocks to enable or disable a shader made to split the stage into SBS for Google Cardboard v1 and v2. (THIS IS VERY UNSTABLE)",
     "state" : "EXTREMELY UNSTABLE",
     "statecolor" : "#341539",
-    "version": "42.5.1",
+    "version": "18.5.2",
     "author": "Sterm"
 }
