@@ -1,6 +1,7 @@
 {
     "name": "UUID Generator",
     "description": "Adds ~7-8 UUID Generators.",
+    "longdescription": "Adds UUID Generators v1, v3, v4, v5 and v7. And some custom ones including v7.5 and v7.6.",
     "version": "12.6.3",
     "author": "Sterm"
 }
