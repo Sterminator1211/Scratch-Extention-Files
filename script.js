@@ -123,7 +123,7 @@ function render(list) {
 
                     <span
                         class="state-badge"
-                        style="background-color: ${escapeHTML(ext.statecolor)}"
+                        style="--state-color: ${escapeHTML(ext.statecolor)}"
                     >
                         ${escapeHTML(ext.state)}
                     </span>
@@ -227,7 +227,7 @@ function renderDetails(ext) {
 
                         <span
                             class="state-badge"
-                            style="background-color: ${escapeHTML(ext.statecolor)}"
+                            style="--state-color: ${escapeHTML(ext.statecolor)}"
                         >
                             ${escapeHTML(ext.state)}
                         </span>
