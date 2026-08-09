@@ -1,0 +1,9 @@
+{
+    "name": "Generic Translator Extension",
+    "description": "Used to translate given sentences.",
+    "longdescription": "Adds blocks to translate a given word or sentence, uses the MyMemory API to translate.",
+    "state" : "Stable",
+    "statecolor" : "#123524",
+    "version": "2.1.0",
+    "author": "Sterm"
+}
