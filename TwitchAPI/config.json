@@ -1,0 +1,9 @@
+{
+    "name": "Twitch API Fetcher",
+    "description": "Used to fetch data from the Twitch API",
+    "longdescription": "Adds way too many blocks, reporters and booleans to fetch data from the twitch API. (REQUIRES TWITCH API KEYS)",
+    "state" : "Beta",
+    "statecolor" : "#8b4000",
+    "version": "8.9.21",
+    "author": "Sterm"
+}
