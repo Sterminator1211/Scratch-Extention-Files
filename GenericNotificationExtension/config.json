@@ -1,0 +1,9 @@
+{
+    "name": "Generic Notification Extension",
+    "description": "Used to give notifications on the running computer.",
+    "longdescription": "Adds a block to give a notification on the running computer, and adds a reporter to boolean to test if browser supports notifications.",
+    "state" : "Stable",
+    "statecolor" : "#123524",
+    "version": "1.0.0",
+    "author": "Sterm"
+}
