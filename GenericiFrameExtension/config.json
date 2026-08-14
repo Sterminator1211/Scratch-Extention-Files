@@ -1,0 +1,9 @@
+{
+    "name": "Generic iFrame Extension",
+    "description": "Used to open multiple iFrames, does not require dependency",
+    "longdescription": "Adds blocks and reporters to manage multiple iFrames, unlike other iframe extensions.",
+    "state" : "Stable",
+    "statecolor" : "#123524",
+    "version": "2.1.0",
+    "author": "Sterm"
+}
