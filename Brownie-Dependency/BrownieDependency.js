@@ -67,13 +67,17 @@
             opcode: 'supportsVR',
             blockType: Scratch.BlockType.BOOLEAN,
             text: 'Browser supports Virtual Reality?'
+          },
+          {
+            opcode: 'supportsLocalStorage',
+            blockType: Scratch.BlockType.BOOLEAN,
+            text: 'Browser supports LocalStorage?'
           }
         ]
       };
     }
 
     getOSName() {
-      // Prefer modern User-Agent Client Hints when available
       if (navigator.userAgentData && navigator.userAgentData.platform) {
         return navigator.userAgentData.platform;
       }
@@ -91,7 +95,6 @@
     getBrowserName() {
       const ua = navigator.userAgent || '';
 
-      // Order matters!
       if (/Edg\//i.test(ua)) return 'Microsoft Edge';
       if (/OPR\/|Opera/i.test(ua)) return 'Opera';
       if (/Firefox|FxiOS/i.test(ua)) return 'Mozilla Firefox';
@@ -121,12 +124,10 @@
     }
 
     supportsMicrophone() {
-      // Same API as camera – the actual device is chosen later by the permission prompt
       return !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia);
     }
 
     supportsSpeaker() {
-      // Audio output is almost always available if the Web Audio API exists
       return !!(window.AudioContext || window.webkitAudioContext);
     }
 
@@ -139,8 +140,15 @@
     }
 
     supportsVR() {
-      // Modern WebXR or legacy WebVR
       return ('xr' in navigator) || ('getVRDisplays' in navigator);
+    }
+
+    supportsLocalStorage() {
+      try {
+        return typeof localStorage !== 'undefined' && localStorage !== null;
+      } catch (e) {
+        return false;
+      }
     }
   }
 
