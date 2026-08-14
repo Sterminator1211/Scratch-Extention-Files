@@ -4,6 +4,6 @@
     "longdescription": "Adds blocks and reporters to manage multiple iFrames, unlike other iframe extensions.",
     "state" : "Stable",
     "statecolor" : "#123524",
-    "version": "2.1.0",
+    "version": "3.2.3",
     "author": "Sterm"
 }
