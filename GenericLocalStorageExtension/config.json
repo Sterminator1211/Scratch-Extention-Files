@@ -1,0 +1,9 @@
+{
+    "name": "Generic LocalStorage Extension",
+    "description": "Adds blocks to interact and gain output from your LocalStorage.",
+    "longdescription": "Adds Blocks and Reporters to give and gain output from specified LocalStorage keys.",
+    "state" : "Stable",
+    "statecolor" : "#123524",
+    "version": "1.0.0",
+    "author": "Sterm"
+}
