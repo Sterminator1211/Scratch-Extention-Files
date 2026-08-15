@@ -1,19 +1,9 @@
-/**
- * Lollipop Dependency
- * Scratch / TurboWarp extension
- * Boolean reporters for browser graphics / engine / library support.
- *
- * Load as an unsandboxed extension (required for canvas / WebGL / WebGPU checks).
- */
 (function (Scratch) {
   'use strict';
-
   if (!Scratch.extensions.unsandboxed) {
     throw new Error('Lollipop Dependency must run unsandboxed');
   }
-
   // ---------- detection helpers ----------
-
   function supportsCanvas2D() {
     try {
       const c = document.createElement('canvas');
@@ -22,7 +12,6 @@
       return false;
     }
   }
-
   function supportsWebGL() {
     try {
       const c = document.createElement('canvas');
@@ -35,15 +24,12 @@
       return false;
     }
   }
-
   function supportsWebGPU() {
     return !!(navigator.gpu && typeof navigator.gpu.requestAdapter === 'function');
   }
-
   function supportsWebAssembly() {
     return typeof WebAssembly === 'object' && typeof WebAssembly.instantiate === 'function';
   }
-
   // Engine detection (feature + UA hybrid, best-effort)
   function isBlink() {
     // Chromium family
@@ -66,7 +52,6 @@
         navigator.userAgentData.brands.some(b => /Chromium|Google Chrome|Microsoft Edge/.test(b.brand)))
     );
   }
-
   function isGecko() {
     // Firefox family
     return !!(
@@ -76,7 +61,6 @@
       /Gecko\/|Firefox\//.test(navigator.userAgent || '')
     ) && !isBlink();
   }
-
   function isWebKit() {
     // Safari / WebKit (including all iOS browsers)
     const ua = navigator.userAgent || '';
@@ -87,12 +71,10 @@
       !isGecko()
     );
   }
-
   function isServo() {
     // Extremely rare in the wild
     return /Servo/.test(navigator.userAgent || '');
   }
-
   // ANGLE detection via WebGL renderer string
   function supportsANGLE() {
     try {
@@ -107,7 +89,20 @@
       return false;
     }
   }
-
+  // GPU name via WebGL debug renderer info
+  function getGPUName() {
+    try {
+      const c = document.createElement('canvas');
+      const gl = c.getContext('webgl') || c.getContext('experimental-webgl') || c.getContext('webgl2');
+      if (!gl) return 'Unknown (no WebGL)';
+      const dbg = gl.getExtension('WEBGL_debug_renderer_info');
+      if (!dbg) return 'Unknown (debug info unavailable)';
+      const renderer = gl.getParameter(dbg.UNMASKED_RENDERER_WEBGL) || '';
+      return renderer || 'Unknown';
+    } catch (e) {
+      return 'Unknown';
+    }
+  }
   // Library presence (only true if the library script has been loaded and exposed a global)
   function hasThreeJS() {
     return typeof window.THREE === 'object' && window.THREE !== null;
@@ -130,9 +125,7 @@
   function hasPaperJS() {
     return typeof window.paper === 'object' && window.paper !== null;
   }
-
   // ---------- extension ----------
-
   class LollipopDependency {
     getInfo() {
       return {
@@ -142,6 +135,12 @@
         color2: '#C44D7A',
         color3: '#9B3A5E',
         blocks: [
+          {
+            opcode: 'returnGPUName',
+            blockType: Scratch.BlockType.REPORTER,
+            text: 'Return GPU Name',
+            disableMonitor: true
+          },
           {
             opcode: 'supportsWebGL',
             blockType: Scratch.BlockType.BOOLEAN,
@@ -241,7 +240,6 @@
         ]
       };
     }
-
     supportsWebGL() {
       return supportsWebGL();
     }
@@ -269,6 +267,9 @@
     supportsANGLE() {
       return supportsANGLE();
     }
+    returnGPUName() {
+      return getGPUName();
+    }
     supportsThreeJS() {
       return hasThreeJS();
     }
@@ -291,6 +292,5 @@
       return hasPaperJS();
     }
   }
-
   Scratch.extensions.register(new LollipopDependency());
 })(Scratch);
