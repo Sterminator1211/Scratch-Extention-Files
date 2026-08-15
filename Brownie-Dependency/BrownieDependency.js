@@ -72,6 +72,22 @@
             opcode: 'supportsLocalStorage',
             blockType: Scratch.BlockType.BOOLEAN,
             text: 'Browser supports LocalStorage?'
+          },
+          '---',
+          {
+            opcode: 'supportsAcceleration',
+            blockType: Scratch.BlockType.BOOLEAN,
+            text: 'Browser supports Acceleration/Accelerometer?'
+          },
+          {
+            opcode: 'supportsDirection',
+            blockType: Scratch.BlockType.BOOLEAN,
+            text: 'Browser supports Direction?'
+          },
+          {
+            opcode: 'supportsTilt',
+            blockType: Scratch.BlockType.BOOLEAN,
+            text: 'Browser supports Tilt?'
           }
         ]
       };
@@ -149,6 +165,22 @@
       } catch (e) {
         return false;
       }
+    }
+
+    // Acceleration uses the accelerometer (DeviceMotionEvent / Accelerometer API)
+    supportsAcceleration() {
+      return ('DeviceMotionEvent' in window) || ('Accelerometer' in window);
+    }
+
+    // Direction (compass heading) comes from DeviceOrientationEvent (absolute orientation needs magnetometer)
+    supportsDirection() {
+      return 'DeviceOrientationEvent' in window;
+    }
+
+    // Tilt (beta/gamma angles) also comes from DeviceOrientationEvent
+    // → same underlying API as Direction
+    supportsTilt() {
+      return 'DeviceOrientationEvent' in window;
     }
   }
 
