@@ -179,6 +179,56 @@ body {
 
 
 /* ============================= */
+/* Test Button */
+/* ============================= */
+
+.test-button {
+    height: 50px;
+
+    padding: 0 18px;
+
+    flex: 0 0 auto;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    border: none;
+
+    border-radius: 12px;
+
+    background: #3b7d5c;
+
+    color: white;
+
+    cursor: pointer;
+
+    font-size: 15px;
+
+    font-weight: 700;
+
+    letter-spacing: .5px;
+
+    transition:
+        background .2s,
+        transform .2s,
+        box-shadow .2s;
+}
+
+
+.test-button:hover {
+    background: #4d9971;
+
+    transform: translateY(-2px);
+
+    box-shadow:
+        0 6px 18px
+        rgba(59, 125, 92, .3);
+}
+
+
+/* ============================= */
 /* Search */
 /* ============================= */
 
@@ -673,6 +723,15 @@ main {
         height: 50px;
 
         flex: 0 0 50px;
+    }
+
+
+    .test-button {
+        height: 50px;
+
+        padding: 0 12px;
+
+        font-size: 13px;
     }
 
 
