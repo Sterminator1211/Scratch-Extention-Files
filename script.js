@@ -18,6 +18,11 @@ const mainPageButton =
         "mainPageButton"
     );
 
+const testButton =
+    document.getElementById(
+        "testButton"
+    );
+
 
 let extensions = [];
 
@@ -147,17 +152,18 @@ function renderExtensions(
     list = null
 ) {
 
-    search.style.display =
-        "";
+    search.style.display = "";
+
+    dependenciesButton.style.display = "";
+
+    mainPageButton.style.display = "";
+
+    testButton.style.display = "";
 
 
     dependenciesButton.classList.remove(
         "active"
     );
-
-
-    mainPageButton.style.display =
-        "";
 
 
     const source =
@@ -184,17 +190,18 @@ function renderDependencies(
     list = null
 ) {
 
-    search.style.display =
-        "";
+    search.style.display = "";
+
+    dependenciesButton.style.display = "";
+
+    mainPageButton.style.display = "";
+
+    testButton.style.display = "";
 
 
     dependenciesButton.classList.add(
         "active"
     );
-
-
-    mainPageButton.style.display =
-        "";
 
 
     const dependencies =
@@ -348,7 +355,6 @@ function createCard(
 
         <div class="content">
 
-
             <h2>
                 ${escapeHTML(ext.name)}
             </h2>
@@ -360,7 +366,6 @@ function createCard(
 
 
             <div class="meta">
-
 
                 <span>
                     ${escapeHTML(ext.version)}
@@ -379,7 +384,6 @@ function createCard(
                     ${escapeHTML(ext.state)}
                 </span>
 
-
             </div>
 
 
@@ -391,11 +395,17 @@ function createCard(
                 Download
             </a>
 
-
         </div>
 
     `;
 
+
+    /*
+     * Clicking the card opens the
+     * extension details page.
+     *
+     * Clicking Download does not.
+     */
 
     card.addEventListener(
         "click",
@@ -412,15 +422,12 @@ function createCard(
             }
 
 
-            /*
-             * Remember which page the user
-             * came from.
-             */
-
             const currentPage =
                 new URLSearchParams(
                     window.location.search
-                ).get("page");
+                ).get(
+                    "page"
+                );
 
 
             sessionStorage.setItem(
@@ -458,19 +465,19 @@ function renderDetails(
     search.style.display =
         "none";
 
-
     dependenciesButton.style.display =
         "none";
 
-
     mainPageButton.style.display =
+        "none";
+
+    testButton.style.display =
         "none";
 
 
     grid.innerHTML = `
 
         <div class="extension-details">
-
 
             <button
                 class="back-button"
@@ -482,7 +489,6 @@ function renderDetails(
 
             <div class="details-header">
 
-
                 <img
                     class="details-icon"
                     src="${escapeHTML(ext.icon)}"
@@ -491,7 +497,6 @@ function renderDetails(
 
 
                 <div class="details-info">
-
 
                     <h1>
                         ${escapeHTML(ext.name)}
@@ -506,7 +511,6 @@ function renderDetails(
 
 
                     <div class="meta">
-
 
                         <span>
                             ${escapeHTML(ext.version)}
@@ -525,18 +529,14 @@ function renderDetails(
                             ${escapeHTML(ext.state)}
                         </span>
 
-
                     </div>
 
-
                 </div>
-
 
             </div>
 
 
             <div class="details-content">
-
 
                 <h2>
                     About this extension
@@ -558,9 +558,7 @@ function renderDetails(
                     Download Extension
                 </a>
 
-
             </div>
-
 
         </div>
 
@@ -647,6 +645,42 @@ dependenciesButton.addEventListener(
 
 
 /* ============================= */
+/* Test Button */
+/* ============================= */
+
+testButton.addEventListener(
+    "click",
+    function() {
+
+        const link =
+            document.createElement(
+                "a"
+            );
+
+
+        link.href =
+            "/extension-tester.pmp";
+
+
+        link.download =
+            "extension-tester.pmp";
+
+
+        document.body.appendChild(
+            link
+        );
+
+
+        link.click();
+
+
+        link.remove();
+
+    }
+);
+
+
+/* ============================= */
 /* Search */
 /* ============================= */
 
@@ -676,8 +710,8 @@ search.addEventListener(
 
 
         /*
-         * Determine which collection
-         * is currently being searched.
+         * Dependencies page:
+         * only search dependencies.
          */
 
         if (
@@ -693,6 +727,11 @@ search.addEventListener(
                 );
 
         } else {
+
+            /*
+             * Normal page:
+             * hide dependencies.
+             */
 
             source =
                 extensions.filter(
@@ -729,7 +768,8 @@ search.addEventListener(
 
 
         /*
-         * Search extension fields.
+         * Search name, description,
+         * author, state, and version.
          */
 
         const filtered =
