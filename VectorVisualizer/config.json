@@ -1,0 +1,9 @@
+{
+    "name": "Vector Visualizer",
+    "description": "Draw, make, and show vector images.",
+    "longdescription": "Adds a way to draw, make, and show vector images, and display them on the canvas. As well as resizing and moving the images.",
+    "state" : "Stable",
+    "statecolor" : "#123524",
+    "version": "4.8.0",
+    "author": "Sterm"
+}
