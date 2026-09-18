@@ -24,16 +24,16 @@ function findDLLs(extensionPath) {
         );
 
 
-    /*
-     * DLLs folder does not exist.
-     */
-
     if (
         !fs.existsSync(dllsPath) ||
         !fs.statSync(dllsPath).isDirectory()
     ) {
         return [];
     }
+
+
+    const extensionFolderName =
+        path.basename(extensionPath);
 
 
     const entries =
@@ -49,11 +49,6 @@ function findDLLs(extensionPath) {
 
 
     for (const entry of entries) {
-
-        /*
-         * Every DLL is represented by
-         * its own folder.
-         */
 
         if (!entry.isDirectory()) {
             continue;
@@ -77,10 +72,6 @@ function findDLLs(extensionPath) {
                 "config.json"
             );
 
-
-        /*
-         * DLL must have config.json.
-         */
 
         if (!fs.existsSync(configPath)) {
             continue;
@@ -112,10 +103,6 @@ function findDLLs(extensionPath) {
         }
 
 
-        /*
-         * Find the DLL's JS file.
-         */
-
         const files =
             fs.readdirSync(
                 dllPath
@@ -131,31 +118,40 @@ function findDLLs(extensionPath) {
             );
 
 
-        /*
-         * DLL must have a JS file.
-         */
-
         if (!jsFile) {
             continue;
         }
 
 
         /*
-         * title and version come
-         * directly from the DLL config.
+         * DLL icon:
+         *
+         * DLL folder/icon.png
+         *      ↓
+         * otherwise
+         * /defaultDLL.png
          */
 
-        const title =
-            config.title ||
-            dllFolderName;
+        const dllIconPath =
+            path.join(
+                dllPath,
+                "icon.png"
+            );
 
 
-        const version =
-            config.version ||
-            "Unknown";
+        const hasDLLIcon =
+            fs.existsSync(
+                dllIconPath
+            );
 
 
-        const encodedFolder =
+        const encodedExtensionFolder =
+            encodeURIComponent(
+                extensionFolderName
+            );
+
+
+        const encodedDLLFolder =
             encodeURIComponent(
                 dllFolderName
             );
@@ -167,33 +163,42 @@ function findDLLs(extensionPath) {
             );
 
 
+        const icon =
+            hasDLLIcon
+                ? `/${encodedExtensionFolder}/DLLs/${encodedDLLFolder}/icon.png`
+                : "/defaultDLL.png";
+
+
+        const script =
+            `/${encodedExtensionFolder}/DLLs/${encodedDLLFolder}/${encodedJS}`;
+
+
         dlls.push({
 
             folder:
                 dllFolderName,
 
             title:
-                title,
+                config.title ||
+                dllFolderName,
 
             version:
-                version,
+                config.version ||
+                "Unknown",
 
             file:
                 jsFile,
 
+            icon:
+                icon,
+
             script:
-                `/${encodeURIComponent(
-                    path.basename(extensionPath)
-                )}/DLLs/${encodedFolder}/${encodedJS}`
+                script
 
         });
 
     }
 
-
-    /*
-     * Sort DLLs alphabetically.
-     */
 
     dlls.sort(
         (a, b) =>
@@ -209,7 +214,7 @@ function findDLLs(extensionPath) {
 
 
 /* ============================= */
-/* API Handler */
+/* Main API Handler */
 /* ============================= */
 
 export default function handler(
@@ -237,18 +242,10 @@ export default function handler(
 
         for (const entry of entries) {
 
-            /*
-             * Only inspect folders.
-             */
-
             if (!entry.isDirectory()) {
                 continue;
             }
 
-
-            /*
-             * Ignore internal folders.
-             */
 
             if (
                 IGNORE.has(
@@ -276,10 +273,6 @@ export default function handler(
                     "config.json"
                 );
 
-
-            /*
-             * config.json is required.
-             */
 
             if (
                 !fs.existsSync(
@@ -321,10 +314,6 @@ export default function handler(
                 );
 
 
-            /*
-             * Find the main extension JS file.
-             */
-
             const jsFile =
                 files.find(
                     file =>
@@ -334,17 +323,13 @@ export default function handler(
                 );
 
 
-            /*
-             * JS file is required.
-             */
-
             if (!jsFile) {
                 continue;
             }
 
 
             /*
-             * Icon is optional.
+             * Main extension icon.
              */
 
             const iconPath =
@@ -361,7 +346,7 @@ export default function handler(
 
 
             /*
-             * Main extension information.
+             * Metadata defaults.
              */
 
             const name =
@@ -406,20 +391,12 @@ export default function handler(
 
             /*
              * DLL availability.
-             *
-             * The requested format is:
-             *
-             * "dll_available": "true"
              */
 
             const dllAvailable =
-                config.dll_available === "true";
+                config.dll_available ===
+                "true";
 
-
-            /*
-             * Only scan DLLs when the
-             * extension says they are available.
-             */
 
             const dlls =
                 dllAvailable
@@ -488,10 +465,6 @@ export default function handler(
 
         }
 
-
-        /*
-         * Alphabetical ordering.
-         */
 
         extensions.sort(
             (a, b) =>
