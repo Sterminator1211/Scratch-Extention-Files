@@ -73,7 +73,7 @@ async function loadExtensions() {
 
 
         /*
-         * Individual extension page
+         * Individual extension page.
          */
 
         if (extensionName) {
@@ -100,7 +100,7 @@ async function loadExtensions() {
 
 
         /*
-         * Dependencies page
+         * Dependencies page.
          */
 
         if (
@@ -116,7 +116,7 @@ async function loadExtensions() {
 
 
         /*
-         * Normal extension page
+         * Normal extension page.
          */
 
         renderExtensions();
@@ -152,13 +152,17 @@ function renderExtensions(
     list = null
 ) {
 
-    search.style.display = "";
+    search.style.display =
+        "";
 
-    dependenciesButton.style.display = "";
+    dependenciesButton.style.display =
+        "";
 
-    mainPageButton.style.display = "";
+    mainPageButton.style.display =
+        "";
 
-    testButton.style.display = "";
+    testButton.style.display =
+        "";
 
 
     dependenciesButton.classList.remove(
@@ -190,13 +194,17 @@ function renderDependencies(
     list = null
 ) {
 
-    search.style.display = "";
+    search.style.display =
+        "";
 
-    dependenciesButton.style.display = "";
+    dependenciesButton.style.display =
+        "";
 
-    mainPageButton.style.display = "";
+    mainPageButton.style.display =
+        "";
 
-    testButton.style.display = "";
+    testButton.style.display =
+        "";
 
 
     dependenciesButton.classList.add(
@@ -401,8 +409,7 @@ function createCard(
 
 
     /*
-     * Clicking the card opens the
-     * extension details page.
+     * Clicking the card opens details.
      *
      * Clicking Download does not.
      */
@@ -550,13 +557,31 @@ function renderDetails(
                 </p>
 
 
-                <a
-                    class="download details-download"
-                    href="${escapeHTML(ext.script)}"
-                    download
-                >
-                    Download Extension
-                </a>
+                <div class="details-actions">
+
+                    <a
+                        class="download details-download"
+                        href="${escapeHTML(ext.script)}"
+                        download
+                    >
+                        Download Extension
+                    </a>
+
+
+                    ${
+                        ext.dll_available
+                            ? `
+                                <button
+                                    class="dll-button"
+                                    id="dllButton"
+                                >
+                                    DLL(s)
+                                </button>
+                            `
+                            : ""
+                    }
+
+                </div>
 
             </div>
 
@@ -564,6 +589,10 @@ function renderDetails(
 
     `;
 
+
+    /*
+     * Back button.
+     */
 
     const backButton =
         document.getElementById(
@@ -598,6 +627,358 @@ function renderDetails(
 
         }
     );
+
+
+    /*
+     * DLL button.
+     */
+
+    if (
+        ext.dll_available
+    ) {
+
+        const dllButton =
+            document.getElementById(
+                "dllButton"
+            );
+
+
+        dllButton.addEventListener(
+            "click",
+            function() {
+
+                openDLLMenu(
+                    ext
+                );
+
+            }
+        );
+
+    }
+
+}
+
+
+/* ============================= */
+/* DLL Popup */
+/* ============================= */
+
+function openDLLMenu(
+    ext
+) {
+
+    /*
+     * Prevent duplicate popups.
+     */
+
+    closeDLLMenu();
+
+
+    const backdrop =
+        document.createElement(
+            "div"
+        );
+
+
+    backdrop.className =
+        "dll-modal-backdrop";
+
+
+    const modal =
+        document.createElement(
+            "div"
+        );
+
+
+    modal.className =
+        "dll-modal";
+
+
+    const header =
+        document.createElement(
+            "div"
+        );
+
+
+    header.className =
+        "dll-modal-header";
+
+
+    const title =
+        document.createElement(
+            "h2"
+        );
+
+
+    title.textContent =
+        "DLL(s)";
+
+
+    const closeButton =
+        document.createElement(
+            "button"
+        );
+
+
+    closeButton.className =
+        "dll-close-button";
+
+
+    closeButton.type =
+        "button";
+
+
+    closeButton.setAttribute(
+        "aria-label",
+        "Close DLL menu"
+    );
+
+
+    closeButton.textContent =
+        "×";
+
+
+    header.appendChild(
+        title
+    );
+
+
+    header.appendChild(
+        closeButton
+    );
+
+
+    modal.appendChild(
+        header
+    );
+
+
+    const list =
+        document.createElement(
+            "div"
+        );
+
+
+    list.className =
+        "dll-list";
+
+
+    /*
+     * No DLLs found.
+     */
+
+    if (
+        !ext.dlls ||
+        ext.dlls.length === 0
+    ) {
+
+        const empty =
+            document.createElement(
+                "p"
+            );
+
+
+        empty.className =
+            "dll-empty";
+
+
+        empty.textContent =
+            "No DLLs found.";
+
+
+        list.appendChild(
+            empty
+        );
+
+    } else {
+
+        /*
+         * Create one button for
+         * every DLL.
+         */
+
+        ext.dlls.forEach(
+            dll => {
+
+                const button =
+                    document.createElement(
+                        "button"
+                    );
+
+
+                button.className =
+                    "dll-option";
+
+
+                button.type =
+                    "button";
+
+
+                button.textContent =
+                    `${dll.title}   -  ${dll.version}`;
+
+
+                button.addEventListener(
+                    "click",
+                    function() {
+
+                        downloadDLL(
+                            dll
+                        );
+
+                    }
+                );
+
+
+                list.appendChild(
+                    button
+                );
+
+            }
+        );
+
+    }
+
+
+    modal.appendChild(
+        list
+    );
+
+
+    backdrop.appendChild(
+        modal
+    );
+
+
+    document.body.appendChild(
+        backdrop
+    );
+
+
+    /*
+     * Clicking outside the modal closes it.
+     */
+
+    backdrop.addEventListener(
+        "click",
+        function(event) {
+
+            if (
+                event.target ===
+                backdrop
+            ) {
+
+                closeDLLMenu();
+
+            }
+
+        }
+    );
+
+
+    /*
+     * Close button.
+     */
+
+    closeButton.addEventListener(
+        "click",
+        closeDLLMenu
+    );
+
+
+    /*
+     * Escape closes the popup.
+     */
+
+    document.addEventListener(
+        "keydown",
+        handleDLLKeydown
+    );
+
+}
+
+
+/* ============================= */
+/* Download DLL */
+/* ============================= */
+
+function downloadDLL(
+    dll
+) {
+
+    const link =
+        document.createElement(
+            "a"
+        );
+
+
+    link.href =
+        dll.script;
+
+
+    link.download =
+        dll.file;
+
+
+    document.body.appendChild(
+        link
+    );
+
+
+    link.click();
+
+
+    link.remove();
+
+
+    closeDLLMenu();
+
+}
+
+
+/* ============================= */
+/* Close DLL Popup */
+/* ============================= */
+
+function closeDLLMenu() {
+
+    const existing =
+        document.querySelector(
+            ".dll-modal-backdrop"
+        );
+
+
+    if (existing) {
+
+        existing.remove();
+
+    }
+
+
+    document.removeEventListener(
+        "keydown",
+        handleDLLKeydown
+    );
+
+}
+
+
+/* ============================= */
+/* DLL Keyboard Handler */
+/* ============================= */
+
+function handleDLLKeydown(
+    event
+) {
+
+    if (
+        event.key ===
+        "Escape"
+    ) {
+
+        closeDLLMenu();
+
+    }
 
 }
 
@@ -710,8 +1091,7 @@ search.addEventListener(
 
 
         /*
-         * Dependencies page:
-         * only search dependencies.
+         * Dependencies page.
          */
 
         if (
@@ -729,8 +1109,7 @@ search.addEventListener(
         } else {
 
             /*
-             * Normal page:
-             * hide dependencies.
+             * Normal page.
              */
 
             source =
@@ -768,8 +1147,7 @@ search.addEventListener(
 
 
         /*
-         * Search name, description,
-         * author, state, and version.
+         * Search fields.
          */
 
         const filtered =
@@ -813,8 +1191,7 @@ search.addEventListener(
 
 
         /*
-         * Render results on the
-         * appropriate page.
+         * Render search results.
          */
 
         if (
