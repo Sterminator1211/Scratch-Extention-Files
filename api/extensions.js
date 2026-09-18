@@ -24,6 +24,10 @@ function findDLLs(extensionPath) {
         );
 
 
+    /*
+     * No DLLs folder.
+     */
+
     if (
         !fs.existsSync(dllsPath) ||
         !fs.statSync(dllsPath).isDirectory()
@@ -50,6 +54,10 @@ function findDLLs(extensionPath) {
 
     for (const entry of entries) {
 
+        /*
+         * Every DLL has its own folder.
+         */
+
         if (!entry.isDirectory()) {
             continue;
         }
@@ -72,6 +80,10 @@ function findDLLs(extensionPath) {
                 "config.json"
             );
 
+
+        /*
+         * config.json is required.
+         */
 
         if (!fs.existsSync(configPath)) {
             continue;
@@ -103,6 +115,10 @@ function findDLLs(extensionPath) {
         }
 
 
+        /*
+         * Find the DLL JS file.
+         */
+
         const files =
             fs.readdirSync(
                 dllPath
@@ -118,18 +134,21 @@ function findDLLs(extensionPath) {
             );
 
 
+        /*
+         * JS file is required.
+         */
+
         if (!jsFile) {
             continue;
         }
 
 
         /*
-         * DLL icon:
+         * DLL icon.
          *
          * DLL folder/icon.png
-         *      ↓
-         * otherwise
-         * /defaultDLL.png
+         *        ↓
+         * defaultDLL.png
          */
 
         const dllIconPath =
@@ -200,6 +219,10 @@ function findDLLs(extensionPath) {
     }
 
 
+    /*
+     * Alphabetical order.
+     */
+
     dlls.sort(
         (a, b) =>
             a.title.localeCompare(
@@ -214,7 +237,7 @@ function findDLLs(extensionPath) {
 
 
 /* ============================= */
-/* Main API Handler */
+/* API Handler */
 /* ============================= */
 
 export default function handler(
@@ -242,10 +265,18 @@ export default function handler(
 
         for (const entry of entries) {
 
+            /*
+             * Only inspect folders.
+             */
+
             if (!entry.isDirectory()) {
                 continue;
             }
 
+
+            /*
+             * Ignore server/system folders.
+             */
 
             if (
                 IGNORE.has(
@@ -273,6 +304,10 @@ export default function handler(
                     "config.json"
                 );
 
+
+            /*
+             * config.json is required.
+             */
 
             if (
                 !fs.existsSync(
@@ -314,6 +349,10 @@ export default function handler(
                 );
 
 
+            /*
+             * Find the main extension JS file.
+             */
+
             const jsFile =
                 files.find(
                     file =>
@@ -322,6 +361,10 @@ export default function handler(
                             .endsWith(".js")
                 );
 
+
+            /*
+             * JS file is required.
+             */
 
             if (!jsFile) {
                 continue;
@@ -390,13 +433,24 @@ export default function handler(
 
 
             /*
-             * DLL availability.
+             * Support both:
+             *
+             * "dll_available": "true"
+             *
+             * and
+             *
+             * "dll_available": true
              */
 
             const dllAvailable =
-                config.dll_available ===
-                "true";
+                config.dll_available === "true" ||
+                config.dll_available === true;
 
+
+            /*
+             * Only search for DLLs when
+             * dll_available is enabled.
+             */
 
             const dlls =
                 dllAvailable
@@ -465,6 +519,10 @@ export default function handler(
 
         }
 
+
+        /*
+         * Alphabetical order.
+         */
 
         extensions.sort(
             (a, b) =>
