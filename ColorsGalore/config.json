@@ -1,0 +1,9 @@
+{
+    "name": "Colors Galore",
+    "description": "Picks and Converts COLORS!!!",
+    "longdescription": "Has blocks to pick and convert different color FORMATS!!",
+    "state" : "Stable",
+    "statecolor" : "#123524",
+    "version": "1.3.7",
+    "author": "Sterm"
+}
