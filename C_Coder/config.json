@@ -1,0 +1,10 @@
+{
+    "name": "C Block Coder",
+    "description": "Used to code C but with blocks.",
+    "longdescription": "I am NOT preparing a Description yet.",
+    "state" : "NotReadForPublic",
+    "statecolor" : "#8B0000",
+    "version": "1",
+    "author": "Sterm",
+    "type": "NotReady"
+}
