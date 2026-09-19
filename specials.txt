@@ -1,9 +1,9 @@
 ------------= TAGS (These are things going in the "type" category of config.json
 a) Dependency
   $Type_Tag: "Dependency"
-  $Search_Tag **BUTTON
-  $This is for dependencies
+  $Search_Tag: **BUTTON
+  $Description: This is for dependencies
 b) NotReady
   $Type_Tag: "NotReady"
-  $Search_Tag: ##!NotReady
-  $Desciption: This is used for stuff NOT ready for the public.
+  $Search_Tag: "##!NotReady"
+  $Description: This is used for stuff NOT ready for the public.
