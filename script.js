@@ -117,6 +117,9 @@ async function loadExtensions() {
 
         /*
          * Normal extension page.
+         *
+         * NotReady extensions are
+         * intentionally excluded.
          */
 
         renderExtensions();
@@ -170,17 +173,126 @@ function renderExtensions(
     );
 
 
+    /*
+     * Normal extensions are anything
+     * that is NOT a dependency AND
+     * NOT NotReady.
+     */
+
     const source =
         list ||
         extensions.filter(
             ext =>
                 ext.type !==
-                "dependency"
+                    "dependency" &&
+                ext.type !==
+                    "NotReady"
         );
 
 
     renderCards(
         source
+    );
+
+}
+
+
+/* ============================= */
+/* NotReady Page */
+/* ============================= */
+
+function renderNotReady(
+    list = null
+) {
+
+    search.style.display =
+        "";
+
+    dependenciesButton.style.display =
+        "";
+
+    mainPageButton.style.display =
+        "";
+
+    testButton.style.display =
+        "";
+
+
+    dependenciesButton.classList.remove(
+        "active"
+    );
+
+
+    const notReady =
+        list ||
+        extensions.filter(
+            ext =>
+                ext.type ===
+                "NotReady"
+        );
+
+
+    grid.innerHTML = `
+
+        <div class="page-title">
+
+            <h1>
+                NotReady
+            </h1>
+
+            <p>
+                Extensions that are not ready.
+            </p>
+
+        </div>
+
+    `;
+
+
+    const notReadyGrid =
+        document.createElement(
+            "div"
+        );
+
+
+    notReadyGrid.className =
+        "dependency-grid";
+
+
+    if (
+        notReady.length ===
+        0
+    ) {
+
+        notReadyGrid.innerHTML = `
+
+            <div class="loading">
+
+                No NotReady extensions found.
+
+            </div>
+
+        `;
+
+    } else {
+
+        notReady.forEach(
+            extension => {
+
+                notReadyGrid.appendChild(
+                    createCard(
+                        extension
+                    )
+                );
+
+            }
+        );
+
+    }
+
+
+    grid.appendChild(
+        notReadyGrid
     );
 
 }
@@ -409,8 +521,9 @@ function createCard(
 
 
     /*
-     * Clicking anywhere on the card
-     * except Download opens details.
+     * Clicking the card opens details.
+     *
+     * Download remains separate.
      */
 
     card.addEventListener(
@@ -589,10 +702,6 @@ function renderDetails(
     `;
 
 
-    /*
-     * Back button.
-     */
-
     const backButton =
         document.getElementById(
             "backButton"
@@ -758,13 +867,10 @@ function openDLLMenu(
         "dll-list";
 
 
-    /*
-     * No DLLs.
-     */
-
     if (
         !ext.dlls ||
-        ext.dlls.length === 0
+        ext.dlls.length ===
+            0
     ) {
 
         const empty =
@@ -787,10 +893,6 @@ function openDLLMenu(
 
     } else {
 
-        /*
-         * Create one option for each DLL.
-         */
-
         ext.dlls.forEach(
             dll => {
 
@@ -808,10 +910,6 @@ function openDLLMenu(
                     "button";
 
 
-                /*
-                 * Text.
-                 */
-
                 const text =
                     document.createElement(
                         "span"
@@ -825,10 +923,6 @@ function openDLLMenu(
                 text.textContent =
                     `${dll.title}   -  ${dll.version}`;
 
-
-                /*
-                 * Icon.
-                 */
 
                 const icon =
                     document.createElement(
@@ -848,11 +942,6 @@ function openDLLMenu(
                 icon.alt =
                     "";
 
-
-                /*
-                 * If the custom icon fails,
-                 * use the default DLL icon.
-                 */
 
                 icon.addEventListener(
                     "error",
@@ -882,10 +971,6 @@ function openDLLMenu(
                     icon
                 );
 
-
-                /*
-                 * Download this DLL.
-                 */
 
                 button.addEventListener(
                     "click",
@@ -924,10 +1009,6 @@ function openDLLMenu(
     );
 
 
-    /*
-     * Clicking outside the popup closes it.
-     */
-
     backdrop.addEventListener(
         "click",
         function(event) {
@@ -945,19 +1026,11 @@ function openDLLMenu(
     );
 
 
-    /*
-     * Close button.
-     */
-
     closeButton.addEventListener(
         "click",
         closeDLLMenu
     );
 
-
-    /*
-     * Escape key.
-     */
 
     document.addEventListener(
         "keydown",
@@ -1144,6 +1217,24 @@ search.addEventListener(
                 .trim();
 
 
+        /*
+         * SECRET NotReady PAGE
+         *
+         * This must be an exact match.
+         */
+
+        if (
+            value ===
+            "##!notready"
+        ) {
+
+            renderNotReady();
+
+            return;
+
+        }
+
+
         const params =
             new URLSearchParams(
                 window.location.search
@@ -1160,8 +1251,7 @@ search.addEventListener(
 
 
         /*
-         * Dependencies page:
-         * search only dependencies.
+         * Dependencies page.
          */
 
         if (
@@ -1179,15 +1269,19 @@ search.addEventListener(
         } else {
 
             /*
-             * Normal page:
-             * exclude dependencies.
+             * Normal page.
+             *
+             * Hide both Dependencies
+             * and NotReady extensions.
              */
 
             source =
                 extensions.filter(
                     ext =>
                         ext.type !==
-                        "dependency"
+                            "dependency" &&
+                        ext.type !==
+                            "NotReady"
                 );
 
         }
@@ -1218,7 +1312,8 @@ search.addEventListener(
 
 
         /*
-         * Search fields.
+         * Search name, description,
+         * author, state, and version.
          */
 
         const filtered =
@@ -1262,7 +1357,7 @@ search.addEventListener(
 
 
         /*
-         * Render filtered results.
+         * Render results.
          */
 
         if (
