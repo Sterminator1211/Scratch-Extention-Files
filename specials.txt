@@ -1,0 +1,3 @@
+------------= TAGS (These are things going in the "type" category of config.json
+a) NotReady
+  a.1) This is used for stuff NOT ready for the public.
