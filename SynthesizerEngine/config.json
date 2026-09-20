@@ -1,0 +1,9 @@
+{
+    "name": "Synthesizer Engine",
+    "description": "Lets you import audio to edit.",
+    "longdescription": "Adds blocks to let you import, export and edit audio.",
+    "state" : "Stable",
+    "statecolor" : "#123524",
+    "version": "8.5.2",
+    "author": "Sterm"
+}
