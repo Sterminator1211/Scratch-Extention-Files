@@ -1,0 +1,9 @@
+{
+    "name": "Macro Detector",
+    "description": "Adds hats to detect macros.",
+    "longdescription": "Adds hats to detect macros.",
+    "state" : "Stable",
+    "statecolor" : "#123524",
+    "version": "3.1",
+    "author": "Sterm"
+}
