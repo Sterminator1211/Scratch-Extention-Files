@@ -1,0 +1,9 @@
+{
+    "name": "ChromaKey",
+    "description": "Adds blocks to change the colors showing on screen.",
+    "longdescription": "Adds blocks to change the colors showing on screen, As well as simulate colorblindness and apply colorblind filters.",
+    "state" : "Stable",
+    "statecolor" : "#123524",
+    "version": "9.4",
+    "author": "Sterm"
+}
