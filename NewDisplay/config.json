@@ -1,0 +1,9 @@
+{
+    "name": "NewDisplay",
+    "description": "Lets you record the stage.",
+    "longdescription": "Adds blocks to let you record the stage and customize recordings, including FPS, Resolution and other things.",
+    "state" : "Stable",
+    "statecolor" : "#123524",
+    "version": "19.4.9",
+    "author": "Sterm"
+}
