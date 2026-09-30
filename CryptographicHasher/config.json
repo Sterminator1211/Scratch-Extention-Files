@@ -1,0 +1,9 @@
+{
+    "name": "Cryptographic Hasher",
+    "description": "Contains multiple hashing algorythms.",
+    "longdescription": "Contains multiple hashing algorythms, including Base64, MD5, SHA, bcrypt, Argon2, PBKDF2, BLAKE and KangarooTwelve.",
+    "state" : "Stable",
+    "statecolor" : "#123524",
+    "version": "6.9",
+    "author": "Sterm"
+}
