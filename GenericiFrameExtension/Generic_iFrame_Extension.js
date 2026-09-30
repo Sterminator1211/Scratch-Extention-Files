@@ -7,6 +7,49 @@
             this.urlErrors = {};
             this.iframeErrors = {};
             this.configs = {};
+            this.fullscreenListener = this.handleFullscreenChange.bind(this);
+            this.setupFullscreenListeners();
+        }
+
+        setupFullscreenListeners() {
+            document.addEventListener('fullscreenchange', this.fullscreenListener);
+            document.addEventListener('webkitfullscreenchange', this.fullscreenListener);
+            document.addEventListener('mozfullscreenchange', this.fullscreenListener);
+            document.addEventListener('msfullscreenchange', this.fullscreenListener);
+        }
+
+        handleFullscreenChange() {
+            // Reposition all active iframes when fullscreen state changes
+            setTimeout(() => {
+                Object.keys(this.iframes).forEach(id => {
+                    this.repositionIframe(Number(id));
+                });
+            }, 50);
+        }
+
+        repositionIframe(id) {
+            if (!this.iframes[id]) return;
+
+            const config = this.configs[id];
+            const iframe = this.iframes[id];
+            const canvas = Scratch.renderer.canvas || document.querySelector('canvas');
+
+            if (canvas) {
+                const canvasRect = canvas.getBoundingClientRect();
+                
+                // Use fixed positioning with viewport coordinates
+                iframe.style.position = 'fixed';
+                iframe.style.top = (canvasRect.top + config.y) + 'px';
+                iframe.style.left = (canvasRect.left + config.x) + 'px';
+                
+                // Ensure it's not hidden and has proper z-index
+                iframe.style.zIndex = '10000';
+                iframe.style.pointerEvents = 'auto';
+            } else {
+                iframe.style.position = 'absolute';
+                iframe.style.top = config.y + 'px';
+                iframe.style.left = config.x + 'px';
+            }
         }
 
         _ensureConfig(id) {
@@ -163,21 +206,25 @@
 
             try {
                 const iframe = document.createElement('iframe');
-                iframe.style.position = 'absolute';
-                iframe.style.zIndex = '10';
+                iframe.style.position = 'fixed';
+                iframe.style.zIndex = '10000';
                 iframe.style.border = 'none';
+                iframe.style.pointerEvents = 'auto';
                 iframe.src = config.url;
                 iframe.width = config.width + 'px';
                 iframe.height = config.height + 'px';
                 iframe.style.display = config.visible ? 'block' : 'none';
                 
                 const canvas = Scratch.renderer.canvas || document.querySelector('canvas');
-                if (canvas && canvas.parentElement) {
-                    canvas.parentElement.appendChild(iframe);
-                    iframe.style.top = (canvas.offsetTop + config.y) + 'px';
-                    iframe.style.left = (canvas.offsetLeft + config.x) + 'px';
+                
+                // Always append to body for fixed positioning
+                document.body.appendChild(iframe);
+                
+                if (canvas) {
+                    const canvasRect = canvas.getBoundingClientRect();
+                    iframe.style.top = (canvasRect.top + config.y) + 'px';
+                    iframe.style.left = (canvasRect.left + config.x) + 'px';
                 } else {
-                    document.body.appendChild(iframe);
                     iframe.style.top = config.y + 'px';
                     iframe.style.left = config.x + 'px';
                 }
@@ -257,14 +304,7 @@
             this.configs[id].x = x;
             this.configs[id].y = y;
 
-            if (this.iframes[id]) {
-                const canvas = Scratch.renderer.canvas || document.querySelector('canvas');
-                const baseTop = canvas ? canvas.offsetTop : 0;
-                const baseLeft = canvas ? canvas.offsetLeft : 0;
-
-                this.iframes[id].style.left = (baseLeft + x) + 'px';
-                this.iframes[id].style.top = (baseTop + y) + 'px';
-            }
+            this.repositionIframe(id);
         }
 
         listActiveIframes() {
