@@ -1,0 +1,9 @@
+{
+    "name": "HTTP Client",
+    "description": "Lets you send request to websites.",
+    "longdescription": "Adds blocks to let you send GET, POST, PUT, PATCH, and DELETE requests to websites.",
+    "state" : "Stable",
+    "statecolor" : "#123524",
+    "version": "16.8",
+    "author": "Sterm"
+}
