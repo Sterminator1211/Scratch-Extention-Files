@@ -1,11 +1,3 @@
-res.setHeader("Access-Control-Allow-Origin", "*");
-res.setHeader("Access-Control-Allow-Methods", "GET, OPTIONS");
-res.setHeader("Access-Control-Allow-Headers", "Content-Type, Accept");
-
-if (req.method === "OPTIONS") {
-    return res.status(204).end();
-}
-
 import fs from "fs";
 import path from "path";
 
@@ -60,6 +52,28 @@ function listFiles(folderPath) {
 }
 
 export default function handler(req, res) {
+    // CORS headers: allow browser-based clients to read API responses.
+    res.setHeader("Access-Control-Allow-Origin", "*");
+    res.setHeader("Access-Control-Allow-Methods", "GET, OPTIONS");
+    res.setHeader(
+        "Access-Control-Allow-Headers",
+        "Content-Type, Accept"
+    );
+
+    // Handle CORS preflight requests.
+    if (req.method === "OPTIONS") {
+        return res.status(204).end();
+    }
+
+    // This endpoint only supports GET requests.
+    if (req.method !== "GET") {
+        res.setHeader("Allow", "GET, OPTIONS");
+
+        return res.status(405).json({
+            error: "Method not allowed. Use GET."
+        });
+    }
+
     try {
         const root = process.cwd();
 
@@ -86,7 +100,7 @@ export default function handler(req, res) {
                 "config.json"
             );
 
-            // An extension requires a valid config.json
+            // An extension must have a valid config.json
             // and at least one top-level JavaScript file.
             if (!fs.existsSync(configPath)) continue;
 
@@ -114,31 +128,34 @@ export default function handler(req, res) {
 
             if (!mainJS) continue;
 
+            // Count this extension.
             extensionCount++;
 
-            // Extension config size.
-            configSizes.push(fileSize(configPath));
-
-            // Main extension JS size.
-            jsSizes.push(
-                fileSize(path.join(extensionPath, mainJS))
+            // Calculate extension config size.
+            configSizes.push(
+                fileSize(configPath)
             );
 
-            // Count extension icons only when present.
+            // Calculate main extension JavaScript size.
+            jsSizes.push(
+                fileSize(
+                    path.join(extensionPath, mainJS)
+                )
+            );
+
+            // Calculate icon size if icon.png exists.
             const iconPath = path.join(
                 extensionPath,
                 "icon.png"
             );
 
-            if (fs.existsSync(iconPath)) {
-                const size = fileSize(iconPath);
+            const iconBytes = fileSize(iconPath);
 
-                if (size > 0) {
-                    iconSizes.push(size);
-                }
+            if (iconBytes > 0) {
+                iconSizes.push(iconBytes);
             }
 
-            // DLLs are scanned only inside DLLs/.
+            // Find DLLs inside this extension's DLLs folder.
             const dllRoot = path.join(
                 extensionPath,
                 "DLLs"
@@ -155,13 +172,17 @@ export default function handler(req, res) {
                     "config.json"
                 );
 
+                // A DLL must have a config.json.
                 if (!fs.existsSync(dllConfigPath)) continue;
 
                 let dllConfig;
 
                 try {
                     dllConfig = JSON.parse(
-                        fs.readFileSync(dllConfigPath, "utf8")
+                        fs.readFileSync(
+                            dllConfigPath,
+                            "utf8"
+                        )
                     );
                 } catch {
                     continue;
@@ -175,6 +196,7 @@ export default function handler(req, res) {
                     continue;
                 }
 
+                // Find the DLL's JavaScript file.
                 const dllJS = listFiles(dllPath).find(
                     file => file.toLowerCase().endsWith(".js")
                 );
@@ -183,26 +205,34 @@ export default function handler(req, res) {
 
                 dllCount++;
 
-                // Total size of this DLL's JS, config,
-                // and optional icon, in bytes.
+                // Total size of this DLL:
+                // JavaScript + config.json + optional icon.png.
                 const dllBytes =
-                    fileSize(path.join(dllPath, dllJS)) +
+                    fileSize(
+                        path.join(dllPath, dllJS)
+                    ) +
                     fileSize(dllConfigPath) +
-                    fileSize(path.join(dllPath, "icon.png"));
+                    fileSize(
+                        path.join(dllPath, "icon.png")
+                    );
 
                 dllCombinedSizes.push(dllBytes);
             }
         }
 
+        // Build the API response.
         const stats = {
             extensions: {
                 count: extensionCount,
+
                 averageIconSizeKB: Number(
                     toKB(average(iconSizes)).toFixed(2)
                 ),
+
                 averageJSTextSizeKB: Number(
                     toKB(average(jsSizes)).toFixed(2)
                 ),
+
                 averageConfigSizeKB: Number(
                     toKB(average(configSizes)).toFixed(2)
                 )
@@ -210,6 +240,7 @@ export default function handler(req, res) {
 
             dlls: {
                 count: dllCount,
+
                 averageCombinedSizeKB: Number(
                     toKB(average(dllCombinedSizes)).toFixed(2)
                 )
@@ -225,6 +256,7 @@ export default function handler(req, res) {
             units: {
                 size: "KB",
                 bytesPerKB: 1024,
+
                 dllSizeIncludes: [
                     "JavaScript file",
                     "config.json",
@@ -233,17 +265,14 @@ export default function handler(req, res) {
             }
         };
 
-        res.setHeader(
-            "Cache-Control",
-            "no-store"
-        );
+        res.setHeader("Cache-Control", "no-store");
 
-        res.status(200).json(stats);
+        return res.status(200).json(stats);
 
     } catch (error) {
         console.error("Stats API error:", error);
 
-        res.status(500).json({
+        return res.status(500).json({
             error: "Failed to calculate repository statistics."
         });
     }
