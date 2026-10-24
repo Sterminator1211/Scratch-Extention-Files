@@ -33,6 +33,13 @@ function average(values) {
     ) / values.length;
 }
 
+function total(values) {
+    return values.reduce(
+        (sum, value) => sum + value,
+        0
+    );
+}
+
 function listDirectories(folderPath) {
     try {
         return fs.readdirSync(folderPath, {
@@ -45,14 +52,17 @@ function listDirectories(folderPath) {
 
 function listFiles(folderPath) {
     try {
-        return fs.readdirSync(folderPath);
+        return fs.readdirSync(folderPath, {
+            withFileTypes: true
+        }).filter(entry => entry.isFile())
+            .map(entry => entry.name);
     } catch {
         return [];
     }
 }
 
 export default function handler(req, res) {
-    // CORS headers: allow browser-based clients to read API responses.
+    // CORS headers.
     res.setHeader("Access-Control-Allow-Origin", "*");
     res.setHeader("Access-Control-Allow-Methods", "GET, OPTIONS");
     res.setHeader(
@@ -60,12 +70,12 @@ export default function handler(req, res) {
         "Content-Type, Accept"
     );
 
-    // Handle CORS preflight requests.
+    // Handle browser preflight requests.
     if (req.method === "OPTIONS") {
         return res.status(204).end();
     }
 
-    // This endpoint only supports GET requests.
+    // Only GET requests are supported.
     if (req.method !== "GET") {
         res.setHeader("Allow", "GET, OPTIONS");
 
@@ -100,7 +110,7 @@ export default function handler(req, res) {
                 "config.json"
             );
 
-            // An extension must have a valid config.json
+            // An extension requires a valid config.json
             // and at least one top-level JavaScript file.
             if (!fs.existsSync(configPath)) continue;
 
@@ -128,22 +138,21 @@ export default function handler(req, res) {
 
             if (!mainJS) continue;
 
-            // Count this extension.
             extensionCount++;
 
-            // Calculate extension config size.
+            // Record the extension config size.
             configSizes.push(
                 fileSize(configPath)
             );
 
-            // Calculate main extension JavaScript size.
+            // Record the main extension JavaScript size.
             jsSizes.push(
                 fileSize(
                     path.join(extensionPath, mainJS)
                 )
             );
 
-            // Calculate icon size if icon.png exists.
+            // Record the extension icon size, if present.
             const iconPath = path.join(
                 extensionPath,
                 "icon.png"
@@ -155,7 +164,7 @@ export default function handler(req, res) {
                 iconSizes.push(iconBytes);
             }
 
-            // Find DLLs inside this extension's DLLs folder.
+            // Scan DLLs inside this extension's DLLs folder.
             const dllRoot = path.join(
                 extensionPath,
                 "DLLs"
@@ -172,7 +181,6 @@ export default function handler(req, res) {
                     "config.json"
                 );
 
-                // A DLL must have a config.json.
                 if (!fs.existsSync(dllConfigPath)) continue;
 
                 let dllConfig;
@@ -196,7 +204,6 @@ export default function handler(req, res) {
                     continue;
                 }
 
-                // Find the DLL's JavaScript file.
                 const dllJS = listFiles(dllPath).find(
                     file => file.toLowerCase().endsWith(".js")
                 );
@@ -220,11 +227,12 @@ export default function handler(req, res) {
             }
         }
 
-        // Build the API response.
+        // Generate the response.
         const stats = {
             extensions: {
                 count: extensionCount,
 
+                // Average file sizes.
                 averageIconSizeKB: Number(
                     toKB(average(iconSizes)).toFixed(2)
                 ),
@@ -235,12 +243,26 @@ export default function handler(req, res) {
 
                 averageConfigSizeKB: Number(
                     toKB(average(configSizes)).toFixed(2)
+                ),
+
+                // NEW: Total file sizes across main extensions.
+                totalJSTextSizeKB: Number(
+                    toKB(total(jsSizes)).toFixed(2)
+                ),
+
+                totalConfigSizeKB: Number(
+                    toKB(total(configSizes)).toFixed(2)
+                ),
+
+                totalIconSizeKB: Number(
+                    toKB(total(iconSizes)).toFixed(2)
                 )
             },
 
             dlls: {
                 count: dllCount,
 
+                // Average combined size per DLL.
                 averageCombinedSizeKB: Number(
                     toKB(average(dllCombinedSizes)).toFixed(2)
                 )
@@ -256,6 +278,12 @@ export default function handler(req, res) {
             units: {
                 size: "KB",
                 bytesPerKB: 1024,
+
+                extensionTotalsInclude: [
+                    "Top-level extension JavaScript files",
+                    "Top-level extension config.json files",
+                    "Top-level extension icon.png files"
+                ],
 
                 dllSizeIncludes: [
                     "JavaScript file",
