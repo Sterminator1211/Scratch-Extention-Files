@@ -4,6 +4,6 @@
     "longdescription": "Adds blocks to let you send GET, POST, PUT, PATCH, and DELETE requests to websites.",
     "state" : "Stable",
     "statecolor" : "#123524",
-    "version": "16.9",
+    "version": "17.2",
     "author": "Sterm"
 }
