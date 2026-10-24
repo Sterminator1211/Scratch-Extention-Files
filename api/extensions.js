@@ -10,547 +10,302 @@ const IGNORE = new Set([
     "___vc"
 ]);
 
-
-/* ============================= */
-/* Find DLLs */
-/* ============================= */
-
-function findDLLs(extensionPath) {
-
-    const dllsPath =
-        path.join(
-            extensionPath,
-            "DLLs"
-        );
-
-
-    /*
-     * No DLLs folder.
-     */
-
-    if (
-        !fs.existsSync(dllsPath) ||
-        !fs.statSync(dllsPath).isDirectory()
-    ) {
-        return [];
-    }
-
-
-    const extensionFolderName =
-        path.basename(extensionPath);
-
-
-    const entries =
-        fs.readdirSync(
-            dllsPath,
-            {
-                withFileTypes: true
-            }
-        );
-
-
-    const dlls = [];
-
-
-    for (const entry of entries) {
-
-        /*
-         * Every DLL has its own folder.
-         */
-
-        if (!entry.isDirectory()) {
-            continue;
-        }
-
-
-        const dllFolderName =
-            entry.name;
-
-
-        const dllPath =
-            path.join(
-                dllsPath,
-                dllFolderName
-            );
-
-
-        const configPath =
-            path.join(
-                dllPath,
-                "config.json"
-            );
-
-
-        /*
-         * config.json is required.
-         */
-
-        if (!fs.existsSync(configPath)) {
-            continue;
-        }
-
-
-        let config;
-
-
-        try {
-
-            config =
-                JSON.parse(
-                    fs.readFileSync(
-                        configPath,
-                        "utf8"
-                    )
-                );
-
-        } catch (error) {
-
-            console.error(
-                `Invalid DLL config in ${dllFolderName}:`,
-                error
-            );
-
-            continue;
-
-        }
-
-
-        /*
-         * Find the DLL JS file.
-         */
-
-        const files =
-            fs.readdirSync(
-                dllPath
-            );
-
-
-        const jsFile =
-            files.find(
-                file =>
-                    file
-                        .toLowerCase()
-                        .endsWith(".js")
-            );
-
-
-        /*
-         * JS file is required.
-         */
-
-        if (!jsFile) {
-            continue;
-        }
-
-
-        /*
-         * DLL icon.
-         *
-         * DLL folder/icon.png
-         *        ↓
-         * defaultDLL.png
-         */
-
-        const dllIconPath =
-            path.join(
-                dllPath,
-                "icon.png"
-            );
-
-
-        const hasDLLIcon =
-            fs.existsSync(
-                dllIconPath
-            );
-
-
-        const encodedExtensionFolder =
-            encodeURIComponent(
-                extensionFolderName
-            );
-
-
-        const encodedDLLFolder =
-            encodeURIComponent(
-                dllFolderName
-            );
-
-
-        const encodedJS =
-            encodeURIComponent(
-                jsFile
-            );
-
-
-        const icon =
-            hasDLLIcon
-                ? `/${encodedExtensionFolder}/DLLs/${encodedDLLFolder}/icon.png`
-                : "/defaultDLL.png";
-
-
-        const script =
-            `/${encodedExtensionFolder}/DLLs/${encodedDLLFolder}/${encodedJS}`;
-
-
-        dlls.push({
-
-            folder:
-                dllFolderName,
-
-            title:
-                config.title ||
-                dllFolderName,
-
-            version:
-                config.version ||
-                "Unknown",
-
-            file:
-                jsFile,
-
-            icon:
-                icon,
-
-            script:
-                script
-
-        });
-
-    }
-
-
-    /*
-     * Alphabetical order.
-     */
-
-    dlls.sort(
-        (a, b) =>
-            a.title.localeCompare(
-                b.title
-            )
-    );
-
-
-    return dlls;
-
+const ROOT = process.cwd();
+
+// Encode each URL path segment independently.
+function makeURL(...segments) {
+    return "/" + segments
+        .map(segment => encodeURIComponent(String(segment)))
+        .join("/");
 }
 
-
-/* ============================= */
-/* API Handler */
-/* ============================= */
-
-export default function handler(
-    req,
-    res
-) {
-
+function isFile(filePath) {
     try {
-
-        const root =
-            process.cwd();
-
-
-        const entries =
-            fs.readdirSync(
-                root,
-                {
-                    withFileTypes: true
-                }
-            );
-
-
-        const extensions = [];
-
-
-        for (const entry of entries) {
-
-            /*
-             * Only inspect folders.
-             */
-
-            if (!entry.isDirectory()) {
-                continue;
-            }
-
-
-            /*
-             * Ignore server/system folders.
-             */
-
-            if (
-                IGNORE.has(
-                    entry.name
-                )
-            ) {
-                continue;
-            }
-
-
-            const folderName =
-                entry.name;
-
-
-            const folderPath =
-                path.join(
-                    root,
-                    folderName
-                );
-
-
-            const configPath =
-                path.join(
-                    folderPath,
-                    "config.json"
-                );
-
-
-            /*
-             * config.json is required.
-             */
-
-            if (
-                !fs.existsSync(
-                    configPath
-                )
-            ) {
-                continue;
-            }
-
-
-            let config;
-
-
-            try {
-
-                config =
-                    JSON.parse(
-                        fs.readFileSync(
-                            configPath,
-                            "utf8"
-                        )
-                    );
-
-            } catch (error) {
-
-                console.error(
-                    `Could not read ${folderName}/config.json:`,
-                    error
-                );
-
-                continue;
-
-            }
-
-
-            const files =
-                fs.readdirSync(
-                    folderPath
-                );
-
-
-            /*
-             * Find the main extension JS file.
-             */
-
-            const jsFile =
-                files.find(
-                    file =>
-                        file
-                            .toLowerCase()
-                            .endsWith(".js")
-                );
-
-
-            /*
-             * JS file is required.
-             */
-
-            if (!jsFile) {
-                continue;
-            }
-
-
-            /*
-             * Main extension icon.
-             */
-
-            const iconPath =
-                path.join(
-                    folderPath,
-                    "icon.png"
-                );
-
-
-            const hasIcon =
-                fs.existsSync(
-                    iconPath
-                );
-
-
-            /*
-             * Metadata defaults.
-             */
-
-            const name =
-                config.name ||
-                folderName;
-
-
-            const description =
-                config.description ||
-                "No description provided.";
-
-
-            const longdescription =
-                config.longdescription ||
-                description;
-
-
-            const version =
-                config.version ||
-                "Unknown";
-
-
-            const author =
-                config.author ||
-                "Unknown";
-
-
-            const state =
-                config.state ||
-                "Stable";
-
-
-            const statecolor =
-                config.statecolor ||
-                "#486586";
-
-
-            const type =
-                config.type ||
-                "extension";
-
-
-            /*
-             * Support both:
-             *
-             * "dll_available": "true"
-             *
-             * and
-             *
-             * "dll_available": true
-             */
-
-            const dllAvailable =
-                config.dll_available === "true" ||
-                config.dll_available === true;
-
-
-            /*
-             * Only search for DLLs when
-             * dll_available is enabled.
-             */
-
-            const dlls =
-                dllAvailable
-                    ? findDLLs(
-                        folderPath
-                    )
-                    : [];
-
-
-            const encodedFolder =
-                encodeURIComponent(
-                    folderName
-                );
-
-
-            const encodedJS =
-                encodeURIComponent(
-                    jsFile
-                );
-
-
-            extensions.push({
-
-                folder:
-                    folderName,
-
-                name:
-                    name,
-
-                description:
-                    description,
-
-                longdescription:
-                    longdescription,
-
-                version:
-                    version,
-
-                author:
-                    author,
-
-                state:
-                    state,
-
-                statecolor:
-                    statecolor,
-
-                type:
-                    type,
-
-                dll_available:
-                    dllAvailable,
-
-                dlls:
-                    dlls,
-
-                icon:
-                    hasIcon
-                        ? `/${encodedFolder}/icon.png`
-                        : "/default-icon.png",
-
-                script:
-                    `/${encodedFolder}/${encodedJS}`
-
-            });
-
+        return fs.statSync(filePath).isFile();
+    } catch {
+        return false;
+    }
+}
+
+function readJSON(filePath) {
+    try {
+        if (!isFile(filePath)) return null;
+
+        const contents = fs.readFileSync(filePath, "utf8");
+        const parsed = JSON.parse(contents);
+
+        if (
+            !parsed ||
+            typeof parsed !== "object" ||
+            Array.isArray(parsed)
+        ) {
+            return null;
         }
 
+        return parsed;
+    } catch {
+        return null;
+    }
+}
 
-        /*
-         * Alphabetical order.
-         */
+function listDirectories(folderPath) {
+    try {
+        return fs.readdirSync(folderPath, {
+            withFileTypes: true
+        }).filter(entry => entry.isDirectory());
+    } catch {
+        return [];
+    }
+}
 
-        extensions.sort(
-            (a, b) =>
-                a.name.localeCompare(
-                    b.name
+function listFiles(folderPath) {
+    try {
+        return fs.readdirSync(folderPath, {
+            withFileTypes: true
+        })
+            .filter(entry => entry.isFile())
+            .map(entry => entry.name);
+    } catch {
+        return [];
+    }
+}
+
+function findExtensionScript(folderPath, config) {
+    // Prefer the configured filename, including non-JS extensions.
+    if (
+        typeof config.file_name === "string" &&
+        config.file_name.trim() !== ""
+    ) {
+        const configuredName = config.file_name.trim();
+
+        // Extension scripts must be files in the extension's root.
+        if (path.basename(configuredName) === configuredName) {
+            const configuredPath = path.join(
+                folderPath,
+                configuredName
+            );
+
+            if (isFile(configuredPath)) {
+                return configuredName;
+            }
+        }
+    }
+
+    // Backward-compatible fallback: first top-level .js file.
+    return listFiles(folderPath).find(
+        file => file.toLowerCase().endsWith(".js")
+    ) || null;
+}
+
+function dllIsEnabled(config) {
+    return (
+        config.dll_available === true ||
+        String(config.dll_available).trim().toLowerCase() === "true"
+    );
+}
+
+function findDLLs(extensionFolder, extensionName) {
+    const dllRoot = path.join(extensionFolder, "DLLs");
+
+    const dllFolders = listDirectories(dllRoot);
+    const dlls = [];
+
+    for (const entry of dllFolders) {
+        const dllFolderPath = path.join(
+            dllRoot,
+            entry.name
+        );
+
+        const configPath = path.join(
+            dllFolderPath,
+            "config.json"
+        );
+
+        const config = readJSON(configPath);
+
+        // Each DLL needs a valid config.json.
+        if (!config) continue;
+
+        // DLLs use a JavaScript file in their own folder.
+        const jsFile = listFiles(dllFolderPath).find(
+            file => file.toLowerCase().endsWith(".js")
+        );
+
+        if (!jsFile) continue;
+
+        const iconPath = path.join(
+            dllFolderPath,
+            "icon.png"
+        );
+
+        const hasIcon = isFile(iconPath);
+
+        dlls.push({
+            folder: entry.name,
+
+            title: config.title || entry.name,
+            version: config.version || "",
+
+            file_name: jsFile,
+
+            script: makeURL(
+                extensionName,
+                "DLLs",
+                entry.name,
+                jsFile
+            ),
+
+            icon: hasIcon
+                ? makeURL(
+                    extensionName,
+                    "DLLs",
+                    entry.name,
+                    "icon.png"
                 )
+                : "/defaultDLL.png"
+        });
+    }
+
+    return dlls;
+}
+
+function discoverExtensions() {
+    const directories = listDirectories(ROOT);
+    const extensions = [];
+
+    for (const entry of directories) {
+        if (IGNORE.has(entry.name)) continue;
+
+        const folderName = entry.name;
+
+        const extensionPath = path.join(
+            ROOT,
+            folderName
         );
 
-
-        res.status(200).json(
-            extensions
+        const configPath = path.join(
+            extensionPath,
+            "config.json"
         );
+
+        const config = readJSON(configPath);
+
+        // An extension must have a valid config.json.
+        if (!config) continue;
+
+        const scriptFile = findExtensionScript(
+            extensionPath,
+            config
+        );
+
+        // Skip folders without a usable extension script.
+        if (!scriptFile) continue;
+
+        const iconPath = path.join(
+            extensionPath,
+            "icon.png"
+        );
+
+        const hasIcon = isFile(iconPath);
+
+        const dllAvailable = dllIsEnabled(config);
+
+        const extension = {
+            folder: folderName,
+
+            name: config.name || folderName,
+            description: config.description || "",
+            longdescription: config.longdescription || "",
+
+            version: config.version || "",
+            author: config.author || "",
+
+            state: config.state || "Stable",
+            statecolor: config.statecolor || "#486586",
+
+            // Empty type means an ordinary extension.
+            type: config.type || "",
+
+            file_name: scriptFile,
+
+            script: makeURL(
+                folderName,
+                scriptFile
+            ),
+
+            icon: hasIcon
+                ? makeURL(folderName, "icon.png")
+                : "/default-icon.png",
+
+            // Preserve the configured value for compatibility.
+            dll_available: config.dll_available ?? false,
+
+            // Discover DLLs only when DLL support is enabled.
+            dlls: dllAvailable
+                ? findDLLs(extensionPath, folderName)
+                : []
+        };
+
+        extensions.push(extension);
+    }
+
+    // Keep the API response in a stable alphabetical order.
+    extensions.sort((a, b) =>
+        a.name.localeCompare(b.name)
+    );
+
+    return extensions;
+}
+
+export default function handler(req, res) {
+    // CORS: allow browser-based clients from other origins.
+    res.setHeader(
+        "Access-Control-Allow-Origin",
+        "*"
+    );
+
+    res.setHeader(
+        "Access-Control-Allow-Methods",
+        "GET, OPTIONS"
+    );
+
+    res.setHeader(
+        "Access-Control-Allow-Headers",
+        "Content-Type, Accept"
+    );
+
+    // Respond to browser CORS preflight requests.
+    if (req.method === "OPTIONS") {
+        return res.status(204).end();
+    }
+
+    // Only GET is supported for fetching extension information.
+    if (req.method !== "GET") {
+        res.setHeader("Allow", "GET, OPTIONS");
+
+        return res.status(405).json({
+            error: "Method not allowed. Use GET."
+        });
+    }
+
+    try {
+        const extensions = discoverExtensions();
+
+        res.setHeader(
+            "Cache-Control",
+            "no-store"
+        );
+
+        return res.status(200).json(extensions);
 
     } catch (error) {
-
         console.error(
-            "Extension API error:",
+            "Extensions API error:",
             error
         );
 
-
-        res.status(500).json({
-
-            error:
-                "Failed to load extensions."
-
+        return res.status(500).json({
+            error: "Failed to discover extensions."
         });
-
     }
-
 }
