@@ -54,7 +54,8 @@ function listFiles(folderPath) {
     try {
         return fs.readdirSync(folderPath, {
             withFileTypes: true
-        }).filter(entry => entry.isFile())
+        })
+            .filter(entry => entry.isFile())
             .map(entry => entry.name);
     } catch {
         return [];
@@ -140,19 +141,19 @@ export default function handler(req, res) {
 
             extensionCount++;
 
-            // Record the extension config size.
+            // Extension config size.
             configSizes.push(
                 fileSize(configPath)
             );
 
-            // Record the main extension JavaScript size.
+            // Main extension JavaScript size.
             jsSizes.push(
                 fileSize(
                     path.join(extensionPath, mainJS)
                 )
             );
 
-            // Record the extension icon size, if present.
+            // Extension icon size, if present.
             const iconPath = path.join(
                 extensionPath,
                 "icon.png"
@@ -204,6 +205,7 @@ export default function handler(req, res) {
                     continue;
                 }
 
+                // Find the DLL's JavaScript file.
                 const dllJS = listFiles(dllPath).find(
                     file => file.toLowerCase().endsWith(".js")
                 );
@@ -212,7 +214,7 @@ export default function handler(req, res) {
 
                 dllCount++;
 
-                // Total size of this DLL:
+                // Total size of this individual DLL:
                 // JavaScript + config.json + optional icon.png.
                 const dllBytes =
                     fileSize(
@@ -227,12 +229,11 @@ export default function handler(req, res) {
             }
         }
 
-        // Generate the response.
         const stats = {
             extensions: {
                 count: extensionCount,
 
-                // Average file sizes.
+                // Average extension file sizes.
                 averageIconSizeKB: Number(
                     toKB(average(iconSizes)).toFixed(2)
                 ),
@@ -245,7 +246,7 @@ export default function handler(req, res) {
                     toKB(average(configSizes)).toFixed(2)
                 ),
 
-                // NEW: Total file sizes across main extensions.
+                // Total extension file sizes.
                 totalJSTextSizeKB: Number(
                     toKB(total(jsSizes)).toFixed(2)
                 ),
@@ -265,6 +266,11 @@ export default function handler(req, res) {
                 // Average combined size per DLL.
                 averageCombinedSizeKB: Number(
                     toKB(average(dllCombinedSizes)).toFixed(2)
+                ),
+
+                // NEW: Combined size of all discovered DLLs.
+                totalCombinedSizeKB: Number(
+                    toKB(total(dllCombinedSizes)).toFixed(2)
                 )
             },
 
