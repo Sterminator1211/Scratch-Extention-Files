@@ -15,6 +15,7 @@
                 color1: '#2E7D32',
                 color2: '#1B5E20',
                 color3: '#43A047',
+
                 blocks: [
                     {
                         opcode: 'sendRequest',
@@ -23,7 +24,8 @@
                         arguments: {
                             METHOD: {
                                 type: Scratch.ArgumentType.STRING,
-                                menu: 'httpMethods'
+                                menu: 'httpMethods',
+                                defaultValue: 'GET'
                             },
                             URL: {
                                 type: Scratch.ArgumentType.STRING,
@@ -55,8 +57,18 @@
                         text: 'Is Requesting?'
                     }
                 ],
+
                 menus: {
-                    httpMethods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE']
+                    httpMethods: {
+                        acceptReporters: true,
+                        items: [
+                            'GET',
+                            'POST',
+                            'PUT',
+                            'PATCH',
+                            'DELETE'
+                        ]
+                    }
                 }
             };
         }
@@ -64,12 +76,18 @@
         sendRequest(args) {
             const method = String(args.METHOD || 'GET').toUpperCase();
             const url = String(args.URL);
+
             let headers = {};
             let jsonData = {};
 
             try {
                 headers = JSON.parse(String(args.HEADERS));
-                if (typeof headers !== 'object' || headers === null) {
+
+                if (
+                    typeof headers !== 'object' ||
+                    headers === null ||
+                    Array.isArray(headers)
+                ) {
                     headers = {};
                 }
             } catch (e) {
@@ -79,7 +97,11 @@
 
             try {
                 jsonData = JSON.parse(String(args.JSON));
-                if (typeof jsonData !== 'object' || jsonData === null) {
+
+                if (
+                    typeof jsonData !== 'object' ||
+                    jsonData === null
+                ) {
                     jsonData = {};
                 }
             } catch (e) {
@@ -107,8 +129,11 @@
             fetch(url, fetchOptions)
                 .then(response => {
                     if (!response.ok) {
-                        throw new Error(`HTTP Error: ${response.status} ${response.statusText}`);
+                        throw new Error(
+                            `HTTP Error: ${response.status} ${response.statusText}`
+                        );
                     }
+
                     return response.text();
                 })
                 .then(data => {
