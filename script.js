@@ -18,12 +18,6 @@ const mainPageButton =
         "mainPageButton"
     );
 
-const testButton =
-    document.getElementById(
-        "testButton"
-    );
-
-
 let extensions = [];
 
 
