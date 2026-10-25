@@ -158,10 +158,6 @@ function renderExtensions(
     mainPageButton.style.display =
         "";
 
-    testButton.style.display =
-        "";
-
-
     dependenciesButton.classList.remove(
         "active"
     );
@@ -207,10 +203,6 @@ function renderNotReady(
 
     mainPageButton.style.display =
         "";
-
-    testButton.style.display =
-        "";
-
 
     dependenciesButton.classList.remove(
         "active"
@@ -308,10 +300,6 @@ function renderDependencies(
 
     mainPageButton.style.display =
         "";
-
-    testButton.style.display =
-        "";
-
 
     dependenciesButton.classList.add(
         "active"
@@ -583,10 +571,6 @@ function renderDetails(
 
     mainPageButton.style.display =
         "none";
-
-    testButton.style.display =
-        "none";
-
 
     grid.innerHTML = `
 
@@ -1156,42 +1140,6 @@ dependenciesButton.addEventListener(
 
         window.location.href =
             "?page=dependencies";
-
-    }
-);
-
-
-/* ============================= */
-/* Test Button */
-/* ============================= */
-
-testButton.addEventListener(
-    "click",
-    function() {
-
-        const link =
-            document.createElement(
-                "a"
-            );
-
-
-        link.href =
-            "/extension-tester.pmp";
-
-
-        link.download =
-            "extension-tester.pmp";
-
-
-        document.body.appendChild(
-            link
-        );
-
-
-        link.click();
-
-
-        link.remove();
 
     }
 );
